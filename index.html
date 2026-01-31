@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cartera Pro v22 - Fix Calendar</title>
+    <title>Cartera Pro v23 - Final Fix</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA-FSYVbeYlIIJYBD9QrcMqxsgBZGLr3ek",
@@ -22,7 +22,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- ESTILOS ---
+        // --- ESTILOS (TODAS LAS CONFIGURACIONES) ---
         const style = document.createElement('style');
         document.head.appendChild(style);
         window.setTheme = (m) => {
@@ -32,12 +32,12 @@
                 body { background:var(--bg); color:var(--t); font-family:sans-serif; padding:10px; margin:0; }
                 .card { background:var(--c); padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #333; }
                 input, select, button { width:100%; padding:12px; margin:5px 0; border-radius:10px; border:1px solid #444; box-sizing:border-box; font-size:16px; }
-                button { background:var(--a); color:white; font-weight:bold; border:none; }
+                button { background:var(--a); color:white; font-weight:bold; border:none; cursor:pointer; }
                 .total-box { padding:20px; border-radius:15px; text-align:center; font-size:1.4em; font-weight:bold; background:linear-gradient(45deg,#111,#222); color:var(--a); border:1px solid var(--a); margin-bottom:15px; }
                 #modal-h { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:1000; padding:20px; overflow-y:auto; box-sizing:border-box; }
                 .img-icon { width:22px; vertical-align:middle; margin-right:10px; }
                 .input-row { display:flex; align-items:center; background:var(--c); border:1px solid #444; border-radius:10px; margin:5px 0; padding:0 10px; }
-                .input-row input { border:none; background:transparent; }
+                .input-row input { border:none; background:transparent; color:var(--t); }
             `;
         };
         setTheme(localStorage.getItem('theme') || 'dark');
@@ -55,11 +55,16 @@
             }
         });
 
-        // --- ACCIONES ---
+        const calc = () => {
+            let d = 0; uData.eventos.forEach(e => { if(e.tipo==='p' && !e.c) d += (e.monto || 0); });
+            const total = (uData.saldos.binance || 0) + (uData.saldos.bnc || 0) + (uData.saldos.bancaribe || 0) + (uData.saldos.fisico || 0) + d + ((uData.saldos.bolivares || 0) / (uData.saldos.tasa || 1));
+            return total;
+        };
+
         window.guardar = async () => {
             const uid = auth.currentUser.uid;
             uData.saldos = {
-                tasa: parseFloat(document.getElementById('t').value)||0,
+                tasa: parseFloat(document.getElementById('t').value)||1,
                 binance: parseFloat(document.getElementById('bi').value)||0,
                 bnc: parseFloat(document.getElementById('bn').value)||0,
                 bancaribe: parseFloat(document.getElementById('ba').value)||0,
@@ -67,39 +72,45 @@
                 bolivares: parseFloat(document.getElementById('bo').value)||0
             };
             const hoy = new Date().toLocaleDateString('es-ES').replace(/\//g, "-");
+            const totalHoy = calc();
             await setDoc(doc(db, "usuarios", uid), uData);
-            await setDoc(doc(db, "usuarios", uid, "historial", hoy), { fecha:hoy, total:calc() });
-            alert("💾 Guardado y respaldado en calendario");
+            await setDoc(doc(db, "usuarios", uid, "historial", hoy), { fecha:hoy, total:totalHoy });
+            alert("💾 Guardado y respaldado: $" + totalHoy.toFixed(2));
         };
 
         window.verCal = async () => {
-            document.getElementById('modal-h').style.display = 'block';
-            document.getElementById('modal-h').innerHTML = "<h2>Cargando historial...</h2>";
+            const modal = document.getElementById('modal-h');
+            modal.style.display = 'block';
+            modal.innerHTML = "<h2>Cargando historial...</h2>";
             try {
-                const s = await getDocs(collection(db, "usuarios", auth.currentUser.uid, "historial"));
-                let h = "<h2>📅 Historial</h2><button onclick='document.getElementById(\"modal-h\").style.display=\"none\"'>CERRAR</button><hr>";
-                if(s.empty) h += "<p>No hay días guardados aún. Dale al botón verde de guardar primero.</p>";
-                s.forEach(d => { h += `<div class='card'><b>${d.data().fecha}</b><br><span style='color:#27ae60'>$${d.data().total.toFixed(2)}</span></div>`; });
-                document.getElementById('modal-h').innerHTML = h;
-            } catch(e) { alert("Error: " + e.message); }
-        };
-
-        const calc = () => {
-            let d = 0; uData.eventos.forEach(e => { if(e.tipo==='p' && !e.c) d += e.monto; });
-            return uData.saldos.binance + uData.saldos.bnc + uData.saldos.bancaribe + uData.saldos.fisico + d + (uData.saldos.bolivares / uData.saldos.tasa);
+                const q = query(collection(db, "usuarios", auth.currentUser.uid, "historial"));
+                const s = await getDocs(q);
+                let h = "<h2>📅 Historial</h2><button onclick='document.getElementById(\"modal-h\").style.display=\"none\"'>VOLVER A LA APP</button><hr>";
+                if(s.empty) {
+                    h += "<p>No hay registros guardados aún. Dale a 'Guardar' para registrar el día de hoy.</p>";
+                } else {
+                    s.forEach(d => { 
+                        const dia = d.data();
+                        const valor = dia.total !== undefined ? dia.total.toFixed(2) : "0.00"; 
+                        h += `<div class='card'><b>${dia.fecha}</b><br><span style='color:#27ae60'>$${valor}</span></div>`; 
+                    });
+                }
+                modal.innerHTML = h;
+            } catch(e) { alert("Error al cargar: " + e.message); }
         };
 
         window.op = async () => {
             const m = parseFloat(document.getElementById('om').value);
-            const n = document.getElementById('on').value;
+            const n = document.getElementById('on').value || "Sin nombre";
             if(!m) return;
             if(document.getElementById('ot').value==='p') uData.saldos.fisico -= m; else uData.saldos.fisico += m;
             uData.eventos.push({ tipo:document.getElementById('ot').value, monto:m, desc:n, c:false, f:new Date().toLocaleDateString() });
             await guardar();
+            document.getElementById('om').value = ""; document.getElementById('on').value = "";
         };
 
         window.abono = async (i) => {
-            const v = parseFloat(prompt("Monto del abono:"));
+            const v = parseFloat(prompt("¿Cuánto abona " + uData.eventos[i].desc + "?"));
             if(v > 0) { uData.saldos.fisico += v; uData.eventos[i].monto -= v; if(uData.eventos[i].monto <= 0) uData.eventos[i].c = true; await guardar(); }
         };
 
@@ -110,9 +121,9 @@
             document.getElementById('ba').value = uData.saldos.bancaribe;
             document.getElementById('fi').value = uData.saldos.fisico;
             document.getElementById('bo').value = uData.saldos.bolivares;
-            let list = ""; uData.eventos.forEach((e,i) => { if(e.tipo==='p' && !e.c) list += `<div class='card'>${e.desc}: $${e.monto} <button style='width:auto;padding:5px' onclick='abono(${i})'>Abonar</button></div>`; });
+            let list = ""; uData.eventos.forEach((e,i) => { if(e.tipo==='p' && !e.c) list += `<div class='card'>${e.desc}: $${(e.monto||0).toFixed(2)} <button style='width:auto;padding:5px' onclick='abono(${i})'>Abonar</button></div>`; });
             document.getElementById('lista').innerHTML = list || "Sin deudas";
-            document.getElementById('pat').innerHTML = "PATRIMONIO: $" + calc().toLocaleString();
+            document.getElementById('pat').innerHTML = "PATRIMONIO: $" + calc().toLocaleString('en-US', {minimumFractionDigits:2});
         }
 
         window.login = async (m) => {
@@ -127,40 +138,40 @@
     <h2>MI CARTERA</h2>
     <input type="email" id="em" placeholder="Correo">
     <input type="password" id="pa" placeholder="Clave">
-    <button onclick="login('l')">ENTRAR</button>
-    <button onclick="login('r')" style="background:#333">REGISTRAR</button>
+    <button onclick="login('l')">ENTRAR LENTAMENTE</button>
+    <button onclick="login('r')" style="background:#333">CREAR CUENTA</button>
 </div>
 
 <div id="app" style="display:none;">
     <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <button onclick="setTheme('light')" style="background:#eee; color:#000">☀️</button>
-        <button onclick="setTheme('dark')" style="background:#222; color:#fff">🌑</button>
+        <button onclick="setTheme('light')" style="background:#eee; color:#000">☀️ Blanco</button>
+        <button onclick="setTheme('dark')" style="background:#222; color:#fff">🌑 Negro</button>
         <button onclick="verCal()" style="background:#3498db">📅 VER CALENDARIO</button>
     </div>
 
     <div class="total-box" id="pat">...</div>
 
     <div class="card">
-        <h3>💰 Cuentas</h3>
-        <div class="input-row"><img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="t" step="0.01" placeholder="Tasa"></div>
-        <div class="input-row"><img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bi" placeholder="Binance"></div>
-        <div class="input-row"><img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bn" placeholder="BNC"></div>
-        <div class="input-row"><img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="ba" placeholder="Bancaribe"></div>
-        <div class="input-row"><img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="fi" placeholder="Efectivo"></div>
-        <div class="input-row"><img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bo" placeholder="Bolívares"></div>
+        <h3>💰 Mis Cuentas</h3>
+        <div class="input-row"><img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="t" step="0.01" placeholder="Tasa BCV"></div>
+        <div class="input-row"><img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bi" placeholder="Binance $"></div>
+        <div class="input-row"><img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bn" placeholder="BNC $"></div>
+        <div class="input-row"><img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="ba" placeholder="Bancaribe $"></div>
+        <div class="input-row"><img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="fi" placeholder="Efectivo $"></div>
+        <div class="input-row"><img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bo" placeholder="Monto Bs."></div>
         <button onclick="guardar()">💾 GUARDAR Y RESPALDAR DÍA</button>
     </div>
 
     <div class="card">
         <h3>✍️ Operación</h3>
-        <select id="ot"><option value="p">Prestar</option><option value="c">Cobrar</option></select>
-        <input type="text" id="on" placeholder="Nombre">
+        <select id="ot"><option value="p">Prestar (Sale Efectivo)</option><option value="c">Entra $ (Sube Efectivo)</option></select>
+        <input type="text" id="on" placeholder="Nombre / Concepto">
         <input type="number" id="om" placeholder="Monto $">
-        <button onclick="op()">REGISTRAR</button>
+        <button onclick="op()">REGISTRAR OPERACIÓN</button>
     </div>
 
     <div class="card">
-        <h3>👥 Deudores</h3>
+        <h3>👥 Deudores Actuales</h3>
         <div id="lista"></div>
     </div>
 
