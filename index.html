@@ -2,12 +2,690 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cartera Pro v24 - Detalles Full</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>Cartera Pro v23</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.85);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+            --blue: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(148, 163, 184, 0.2);
+            --glass-blur: blur(16px);
+        }
+
+        .light-theme {
+            --bg-primary: #faf9f6;
+            --bg-secondary: #f1f0ed;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(30, 41, 59, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.4s ease, color 0.4s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Login Screen */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .auth-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            min-height: 2.6rem;
+        }
+
+        .cursor { 
+            display: inline-block;
+            width: 3px;
+            height: 1.8rem;
+            background: var(--accent);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease 1.5s forwards;
+        }
+
+        .auth-form {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease 1.8s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-field::placeholder { color: rgba(255,255,255,0.5); }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #059669);
+            color: #fff;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+        }
+
+        .loading-overlay.active { display: flex; }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Main App */
+        #app {
+            display: none;
+            padding: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: var(--glass-blur);
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover { border-color: var(--accent); }
+        .theme-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* Total Box */
+        .total-box {
+            background: linear-gradient(135deg, #0f172a, #1e3a5f, #0f172a);
+            border-radius: 20px;
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .light-theme .total-box {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-color: var(--accent);
+        }
+
+        .total-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .total-bs {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { border-color: var(--accent); }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title span { font-size: 1.3rem; }
+
+        /* Input Groups */
+        .input-group {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-group img {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            z-index: 1;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 14px 14px 48px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-group input::placeholder { color: var(--text-secondary); }
+
+        .input-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Save Button */
+        .btn-save {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent), #059669);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--accent-glow); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Debt List */
+        .debt-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--blue);
+        }
+
+        .debt-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .debt-info small { color: var(--text-secondary); font-size: 0.8rem; }
+
+        .debt-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        .badge-warning { background: var(--warning); color: #000; }
+        .badge-danger { background: var(--danger); color: #fff; }
+
+        .debt-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .debt-amount {
+            font-weight: 600;
+            color: var(--danger);
+            font-size: 1rem;
+        }
+
+        .btn-small {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover { opacity: 0.9; }
+
+        /* Calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .calendar-nav button {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover { border-color: var(--accent); }
+
+        .calendar-month {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 8px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover { background: var(--accent); color: #fff; }
+        .calendar-day.today { border: 2px solid var(--accent); font-weight: 600; }
+        .calendar-day.has-data::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .calendar-day.empty { background: transparent; cursor: default; }
+        .calendar-day.empty:hover { background: transparent; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title { font-size: 1.2rem; font-weight: 600; }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover { background: var(--danger); color: #fff; }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-secondary); }
+        .detail-value { font-weight: 600; }
+        .detail-value.highlight { color: var(--accent); font-size: 1.1rem; }
+
+        /* Logout */
+        .btn-logout {
+            width: 100%;
+            padding: 16px;
+            background: var(--danger);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Grid Layout */
+        .grid { display: grid; gap: 16px; }
+        @media (min-width: 768px) { .grid-cols-2 { grid-template-columns: repeat(2, 1fr); } }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            padding: 16px 24px;
+            border-radius: 12px;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading"><div class="spinner"></div></div>
+
+    <div id="auth-screen">
+        <div class="auth-container">
+            <h1 class="auth-title" id="typewriter-title"></h1>
+            <p class="auth-subtitle">Gestión financiera inteligente</p>
+            <div class="auth-form">
+                <input type="email" id="auth-email" class="input-field" placeholder="Correo electrónico">
+                <input type="password" id="auth-pass" class="input-field" placeholder="Contraseña">
+                <button class="btn btn-primary" onclick="AppAuth.login()">INICIAR SESIÓN</button>
+                <button class="btn btn-secondary" onclick="AppAuth.register()">CREAR CUENTA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app">
+        <div class="header">
+            <div class="theme-toggle">
+                <button class="theme-btn" id="btn-light" onclick="UI.setTheme('light')">☀️ Claro</button>
+                <button class="theme-btn active" id="btn-dark" onclick="UI.setTheme('dark')">🌙 Oscuro</button>
+            </div>
+            <button class="theme-btn" onclick="Calendar.open()">📅 Historial</button>
+        </div>
+
+        <div class="total-box">
+            <div class="total-label">Patrimonio Total</div>
+            <div class="total-amount" id="total-usd">$0.00</div>
+            <div class="total-bs" id="total-bs">Bs. 0,00</div>
+        </div>
+
+        <div class="grid grid-cols-2">
+            <div class="card">
+                <h3 class="card-title"><span>💰</span> Mis Cuentas</h3>
+                <label class="input-label">Tasa BCV</label>
+                <div class="input-group">
+                    <img src="iconos/bcv.png" onerror="this.style.display='none'">
+                    <input type="number" id="tasa" step="0.0001" placeholder="Tasa del día">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/binance.png" onerror="this.style.display='none'">
+                    <input type="number" id="binance" placeholder="Binance $">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/bnc.png" onerror="this.style.display='none'">
+                    <input type="number" id="bnc" placeholder="BNC $">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/bancaribe.png" onerror="this.style.display='none'">
+                    <input type="number" id="bancaribe" placeholder="Bancaribe $">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/efectivo.png" onerror="this.style.display='none'">
+                    <input type="number" id="fisico" placeholder="Efectivo $">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/bolivares.png" onerror="this.style.display='none'">
+                    <input type="number" id="bolivares" placeholder="Bolívares Bs.">
+                </div>
+                <button class="btn-save" id="btn-guardar" onclick="AppData.save()">💾 GUARDAR Y RESPALDAR</button>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="card-title"><span>✍️</span> Nueva Operación</h3>
+                    <div class="input-group">
+                        <select id="tipo-op">
+                            <option value="prestamo">Prestar (Sale Efectivo)</option>
+                            <option value="entrada">Entrada $ (Sube Efectivo)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="desc-op" placeholder="Nombre / Concepto" style="padding-left:14px">
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="monto-op" placeholder="Monto $" style="padding-left:14px">
+                    </div>
+                    <button class="btn-save" onclick="AppData.registerOperation()">REGISTRAR</button>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><span>👥</span> Deudores</h3>
+                    <div id="debt-list"></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                        <span>Total por cobrar:</span>
+                        <span id="total-debt" style="color:var(--danger);font-weight:600">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-logout" onclick="AppAuth.logout()">CERRAR SESIÓN</button>
+    </div>
+
+    <div class="modal-overlay" id="calendar-modal">
+        <div class="modal" style="max-width:500px">
+            <div class="modal-header">
+                <h3 class="modal-title">📅 Historial</h3>
+                <button class="modal-close" onclick="Calendar.close()">×</button>
+            </div>
+            <div class="calendar-header">
+                <button class="theme-btn" onclick="Calendar.prev()">◀</button>
+                <span class="calendar-month" id="calendar-month"></span>
+                <button class="theme-btn" onclick="Calendar.next()">▶</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="day-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="day-modal-title">📊 Desglose</h3>
+                <button class="modal-close" onclick="UI.closeModal('day-modal')">×</button>
+            </div>
+            <div id="day-modal-content"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA-FSYVbeYlIIJYBD9QrcMqxsgBZGLr3ek",
@@ -22,174 +700,250 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const style = document.createElement('style');
-        document.head.appendChild(style);
-        window.setTheme = (m) => {
-            const dark = m === 'dark'; localStorage.setItem('theme', m);
-            style.innerHTML = `
-                :root { --bg:${dark?'#000':'#f0f2f5'}; --c:${dark?'#121212':'#fff'}; --t:${dark?'#fff':'#333'}; --a:#27ae60; --i:#3498db; }
-                body { background:var(--bg); color:var(--t); font-family:sans-serif; padding:10px; margin:0; }
-                .card { background:var(--c); padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #333; }
-                input, select, button { width:100%; padding:12px; margin:5px 0; border-radius:10px; border:1px solid #444; box-sizing:border-box; font-size:16px; }
-                button { background:var(--a); color:white; font-weight:bold; border:none; cursor:pointer; }
-                .total-box { padding:20px; border-radius:15px; text-align:center; font-size:1.4em; font-weight:bold; background:linear-gradient(45deg,#111,#222); color:var(--a); border:1px solid var(--a); margin-bottom:15px; }
-                #modal-h { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:1000; padding:20px; overflow-y:auto; box-sizing:border-box; }
-                .img-icon { width:20px; vertical-align:middle; margin-right:8px; }
-                .input-row { display:flex; align-items:center; background:var(--c); border:1px solid #444; border-radius:10px; margin:5px 0; padding:0 10px; }
-                .input-row input { border:none; background:transparent; color:var(--t); }
-                .hist-item { border-bottom: 1px solid #444; padding: 10px 0; font-size: 0.9em; }
-            `;
+        // State
+        let userData = { saldos: { tasa: 37, binance: 0, bnc: 0, bancaribe: 0, fisico: 0, bolivares: 0 }, eventos: [] };
+        let historialData = {};
+        let calendarDate = new Date();
+
+        // UI Controller
+        window.UI = {
+            setTheme(mode) {
+                document.body.classList.toggle('light-theme', mode === 'light');
+                document.getElementById('btn-light').classList.toggle('active', mode === 'light');
+                document.getElementById('btn-dark').classList.toggle('active', mode === 'dark');
+                localStorage.setItem('theme', mode);
+            },
+            showLoading() { document.getElementById('loading').classList.add('active'); },
+            hideLoading() { document.getElementById('loading').classList.remove('active'); },
+            toast(msg) {
+                const t = document.getElementById('toast');
+                t.textContent = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            },
+            openModal(id) { document.getElementById(id).classList.add('active'); },
+            closeModal(id) { document.getElementById(id).classList.remove('active'); },
+            typewriter(el, text, speed = 80) {
+                let i = 0;
+                el.innerHTML = '<span class="cursor"></span>';
+                const type = () => {
+                    if (i < text.length) {
+                        el.innerHTML = text.slice(0, i + 1) + '<span class="cursor"></span>';
+                        i++;
+                        setTimeout(type, speed);
+                    }
+                };
+                setTimeout(type, 500);
+            }
         };
-        setTheme(localStorage.getItem('theme') || 'dark');
 
-        let uData = { saldos:{tasa:37, binance:0, bnc:0, bancaribe:0, fisico:0, bolivares:0}, eventos:[] };
+        // App Logic
+        window.AppLogic = {
+            calculate() {
+                const s = userData.saldos;
+                let debtTotal = 0;
+                userData.eventos.forEach(e => { if (e.tipo === 'p' && !e.c) debtTotal += (e.monto || 0); });
+                const tasa = s.tasa || 1;
+                const total = (s.binance || 0) + (s.bnc || 0) + (s.bancaribe || 0) + (s.fisico || 0) + debtTotal + ((s.bolivares || 0) / tasa);
+                return { total, debtTotal, tasa };
+            },
+            formatMoney(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
+            daysSince(dateStr) {
+                if (!dateStr) return 0;
+                const parts = dateStr.split('-');
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                return Math.floor((new Date() - d) / (1000 * 60 * 60 * 24));
+            },
+            validate() {
+                const tasa = parseFloat(document.getElementById('tasa').value);
+                if (!tasa || tasa <= 0) { UI.toast('⚠️ La tasa debe ser mayor a 0'); return false; }
+                return true;
+            }
+        };
 
-        onAuthStateChanged(auth, (user) => {
-            if(user) { 
-                document.getElementById('app').style.display='block'; 
-                document.getElementById('auth').style.display='none';
-                onSnapshot(doc(db, "usuarios", user.uid), (s) => { if(s.exists()){ uData=s.data(); render(); }});
-            } else { 
-                document.getElementById('app').style.display='none'; 
-                document.getElementById('auth').style.display='block'; 
+        // Auth
+        window.AppAuth = {
+            async login() {
+                const email = document.getElementById('auth-email').value.trim();
+                const pass = document.getElementById('auth-pass').value;
+                if (!email || !pass) return UI.toast('⚠️ Completa todos los campos');
+                UI.showLoading();
+                try {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } catch (e) { UI.hideLoading(); UI.toast('❌ ' + e.message); }
+            },
+            async register() {
+                const email = document.getElementById('auth-email').value.trim();
+                const pass = document.getElementById('auth-pass').value;
+                if (!email || !pass) return UI.toast('⚠️ Completa todos los campos');
+                UI.showLoading();
+                try {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                } catch (e) { UI.hideLoading(); UI.toast('❌ ' + e.message); }
+            },
+            logout() { signOut(auth); }
+        };
+
+        // Data
+        window.AppData = {
+            render() {
+                const s = userData.saldos;
+                document.getElementById('tasa').value = s.tasa || '';
+                document.getElementById('binance').value = s.binance || '';
+                document.getElementById('bnc').value = s.bnc || '';
+                document.getElementById('bancaribe').value = s.bancaribe || '';
+                document.getElementById('fisico').value = s.fisico || '';
+                document.getElementById('bolivares').value = s.bolivares || '';
+
+                const { total, debtTotal, tasa } = AppLogic.calculate();
+                document.getElementById('total-usd').textContent = '$' + AppLogic.formatMoney(total);
+                document.getElementById('total-bs').textContent = 'Bs. ' + AppLogic.formatMoney(total * tasa);
+                document.getElementById('total-debt').textContent = '$' + AppLogic.formatMoney(debtTotal);
+
+                let debtHTML = '';
+                userData.eventos.forEach((e, i) => {
+                    if (e.tipo === 'p' && !e.c) {
+                        const days = AppLogic.daysSince(e.f);
+                        let badge = '';
+                        if (days > 30) badge = '<span class="debt-badge badge-danger">' + days + ' días</span>';
+                        else if (days > 7) badge = '<span class="debt-badge badge-warning">' + days + ' días</span>';
+                        debtHTML += `<div class="debt-item">
+                            <div class="debt-info"><h4>${e.desc}${badge}</h4><small>${e.f || 'Sin fecha'}</small></div>
+                            <div class="debt-actions">
+                                <span class="debt-amount">$${AppLogic.formatMoney(e.monto || 0)}</span>
+                                <button class="btn-small" onclick="AppData.pay(${i})">Abonar</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+                document.getElementById('debt-list').innerHTML = debtHTML || '<p style="color:var(--text-secondary);text-align:center">Sin deudas pendientes</p>';
+            },
+            async save() {
+                if (!AppLogic.validate()) return;
+                UI.showLoading();
+                const uid = auth.currentUser.uid;
+                userData.saldos = {
+                    tasa: parseFloat(document.getElementById('tasa').value) || 1,
+                    binance: parseFloat(document.getElementById('binance').value) || 0,
+                    bnc: parseFloat(document.getElementById('bnc').value) || 0,
+                    bancaribe: parseFloat(document.getElementById('bancaribe').value) || 0,
+                    fisico: parseFloat(document.getElementById('fisico').value) || 0,
+                    bolivares: parseFloat(document.getElementById('bolivares').value) || 0
+                };
+                const hoy = new Date();
+                const fecha = hoy.toLocaleDateString('es-ES').replace(/\//g, '-');
+                const { total } = AppLogic.calculate();
+                try {
+                    await setDoc(doc(db, "usuarios", uid), userData);
+                    await setDoc(doc(db, "usuarios", uid, "historial", fecha), {
+                        fecha, total, ...userData.saldos
+                    });
+                    UI.toast('✅ Guardado: $' + AppLogic.formatMoney(total));
+                } catch (e) { UI.toast('❌ Error: ' + e.message); }
+                UI.hideLoading();
+            },
+            async registerOperation() {
+                const tipo = document.getElementById('tipo-op').value;
+                const desc = document.getElementById('desc-op').value.trim() || 'Sin nombre';
+                const monto = parseFloat(document.getElementById('monto-op').value);
+                if (!monto || monto <= 0) return UI.toast('⚠️ Monto inválido');
+                
+                if (tipo === 'prestamo') userData.saldos.fisico -= monto;
+                else userData.saldos.fisico += monto;
+
+                const hoy = new Date();
+                const f = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+                userData.eventos.push({ tipo: tipo === 'prestamo' ? 'p' : 'c', monto, desc, c: false, f });
+
+                document.getElementById('desc-op').value = '';
+                document.getElementById('monto-op').value = '';
+                await this.save();
+            },
+            async pay(idx) {
+                const e = userData.eventos[idx];
+                const val = parseFloat(prompt(`¿Cuánto abona ${e.desc}? (Deuda: $${e.monto})`));
+                if (!val || val <= 0) return;
+                userData.saldos.fisico += val;
+                e.monto -= val;
+                if (e.monto <= 0) e.c = true;
+                await this.save();
+            }
+        };
+
+        // Calendar
+        window.Calendar = {
+            open() {
+                UI.openModal('calendar-modal');
+                this.render();
+            },
+            close() { UI.closeModal('calendar-modal'); },
+            prev() { calendarDate.setMonth(calendarDate.getMonth() - 1); this.render(); },
+            next() { calendarDate.setMonth(calendarDate.getMonth() + 1); this.render(); },
+            async render() {
+                const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                document.getElementById('calendar-month').textContent = meses[calendarDate.getMonth()] + ' ' + calendarDate.getFullYear();
+
+                const grid = document.getElementById('calendar-grid');
+                grid.innerHTML = ['D','L','M','M','J','V','S'].map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+                const year = calendarDate.getFullYear();
+                const month = calendarDate.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const today = new Date();
+
+                for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="calendar-day empty"></div>';
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateStr = String(d).padStart(2, '0') + '-' + String(month + 1).padStart(2, '0') + '-' + year;
+                    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                    const hasData = historialData[dateStr];
+                    grid.innerHTML += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasData ? 'has-data' : ''}" onclick="Calendar.showDay('${dateStr}')">${d}</div>`;
+                }
+            },
+            async loadHistorial() {
+                try {
+                    const snap = await getDocs(query(collection(db, "usuarios", auth.currentUser.uid, "historial")));
+                    historialData = {};
+                    snap.forEach(d => { historialData[d.id] = d.data(); });
+                } catch (e) { console.error(e); }
+            },
+            showDay(fecha) {
+                const data = historialData[fecha];
+                if (!data) return UI.toast('📭 Sin datos para ' + fecha);
+                document.getElementById('day-modal-title').textContent = '📊 ' + fecha;
+                const fmt = n => AppLogic.formatMoney(n || 0);
+                document.getElementById('day-modal-content').innerHTML = `
+                    <div class="detail-row"><span class="detail-label">Tasa BCV</span><span class="detail-value">${fmt(data.tasa)} Bs/$</span></div>
+                    <div class="detail-row"><span class="detail-label">Binance</span><span class="detail-value">$${fmt(data.binance)}</span></div>
+                    <div class="detail-row"><span class="detail-label">BNC</span><span class="detail-value">$${fmt(data.bnc)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Bancaribe</span><span class="detail-value">$${fmt(data.bancaribe)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Efectivo</span><span class="detail-value">$${fmt(data.fisico)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Bolívares</span><span class="detail-value">Bs. ${fmt(data.bolivares)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value highlight">$${fmt(data.total)}</span></div>
+                `;
+                UI.openModal('day-modal');
+            }
+        };
+
+        // Init
+        UI.typewriter(document.getElementById('typewriter-title'), 'MI CARTERA PRO');
+        UI.setTheme(localStorage.getItem('theme') || 'dark');
+
+        onAuthStateChanged(auth, async (user) => {
+            UI.hideLoading();
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
+                    if (snap.exists()) { userData = snap.data(); AppData.render(); }
+                });
+                await Calendar.loadHistorial();
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
             }
         });
-
-        const calc = () => {
-            let d = 0; uData.eventos.forEach(e => { if(e.tipo==='p' && !e.c) d += (e.monto || 0); });
-            return (uData.saldos.binance || 0) + (uData.saldos.bnc || 0) + (uData.saldos.bancaribe || 0) + (uData.saldos.fisico || 0) + d + ((uData.saldos.bolivares || 0) / (uData.saldos.tasa || 1));
-        };
-
-        window.guardar = async () => {
-            const uid = auth.currentUser.uid;
-            uData.saldos = {
-                tasa: parseFloat(document.getElementById('t').value)||1,
-                binance: parseFloat(document.getElementById('bi').value)||0,
-                bnc: parseFloat(document.getElementById('bn').value)||0,
-                bancaribe: parseFloat(document.getElementById('ba').value)||0,
-                fisico: parseFloat(document.getElementById('fi').value)||0,
-                bolivares: parseFloat(document.getElementById('bo').value)||0
-            };
-            const hoy = new Date().toLocaleDateString('es-ES').replace(/\//g, "-");
-            const totalHoy = calc();
-            
-            // Guardar datos actuales
-            await setDoc(doc(db, "usuarios", uid), uData);
-            
-            // Guardar RESPALDO con todos los detalles
-            await setDoc(doc(db, "usuarios", uid, "historial", hoy), { 
-                fecha: hoy, 
-                total: totalHoy,
-                detalles: {...uData.saldos},
-                deudas: uData.eventos.filter(e => e.tipo === 'p' && !e.c) 
-            });
-            alert("✅ ¡Respaldo completo guardado! $" + totalHoy.toFixed(2));
-        };
-
-        window.verCal = async () => {
-            const modal = document.getElementById('modal-h');
-            modal.style.display = 'block';
-            modal.innerHTML = "<h2>Cargando historial detallado...</h2>";
-            try {
-                const s = await getDocs(collection(db, "usuarios", auth.currentUser.uid, "historial"));
-                let h = "<h2>📅 Historial de Patrimonio</h2><button onclick='document.getElementById(\"modal-h\").style.display=\"none\"'>VOLVER</button><hr>";
-                if(s.empty) h += "<p>No hay registros.</p>";
-                s.forEach(d => { 
-                    const dia = d.data();
-                    let deudoresStr = dia.deudas && dia.deudas.length > 0 ? dia.deudas.map(deu => `${deu.desc}($${deu.monto})`).join(", ") : "Ninguno";
-                    h += `<div class='card'>
-                            <b style='color:var(--i)'>FECHA: ${dia.fecha}</b><br>
-                            <b style='font-size:1.2em; color:var(--a)'>TOTAL: $${dia.total.toFixed(2)}</b><hr>
-                            <div class='hist-item'>Tasa: ${dia.detalles.tasa} | Binance: $${dia.detalles.binance}</div>
-                            <div class='hist-item'>BNC: $${dia.detalles.bnc} | Bancaribe: $${dia.detalles.bancaribe}</div>
-                            <div class='hist-item'>Efectivo: $${dia.detalles.fisico} | Bs: ${dia.detalles.bolivares}</div>
-                            <div class='hist-item' style='color:#e67e22'>Deudores: ${deudoresStr}</div>
-                          </div>`; 
-                });
-                modal.innerHTML = h;
-            } catch(e) { alert("Error: " + e.message); }
-        };
-
-        window.op = async () => {
-            const m = parseFloat(document.getElementById('om').value);
-            const n = document.getElementById('on').value || "S/N";
-            if(!m) return;
-            if(document.getElementById('ot').value==='p') uData.saldos.fisico -= m; else uData.saldos.fisico += m;
-            uData.eventos.push({ tipo:document.getElementById('ot').value, monto:m, desc:n, c:false, f:new Date().toLocaleDateString() });
-            await guardar();
-            document.getElementById('om').value = ""; document.getElementById('on').value = "";
-        };
-
-        window.abono = async (i) => {
-            const v = parseFloat(prompt("Monto abono:"));
-            if(v > 0) { uData.saldos.fisico += v; uData.eventos[i].monto -= v; if(uData.eventos[i].monto <= 0) uData.eventos[i].c = true; await guardar(); }
-        };
-
-        function render() {
-            document.getElementById('t').value = uData.saldos.tasa;
-            document.getElementById('bi').value = uData.saldos.binance;
-            document.getElementById('bn').value = uData.saldos.bnc;
-            document.getElementById('ba').value = uData.saldos.bancaribe;
-            document.getElementById('fi').value = uData.saldos.fisico;
-            document.getElementById('bo').value = uData.saldos.bolivares;
-            let list = ""; uData.eventos.forEach((e,i) => { if(e.tipo==='p' && !e.c) list += `<div class='card'>${e.desc}: $${(e.monto||0).toFixed(2)} <button style='width:auto;padding:5px' onclick='abono(${i})'>Abonar</button></div>`; });
-            document.getElementById('lista').innerHTML = list || "Sin deudas";
-            document.getElementById('pat').innerHTML = "PATRIMONIO: $" + calc().toLocaleString('en-US', {minimumFractionDigits:2});
-        }
-
-        window.login = async (m) => {
-            const e = document.getElementById('em').value, p = document.getElementById('pa').value;
-            try { m==='l'? await signInWithEmailAndPassword(auth,e,p) : await createUserWithEmailAndPassword(auth,e,p); } catch(err){ alert(err.message); }
-        };
     </script>
-</head>
-<body>
-
-<div id="auth" class="card" style="max-width:400px; margin:50px auto; text-align:center; display:none;">
-    <h2>MI CARTERA</h2>
-    <input type="email" id="em" placeholder="Correo">
-    <input type="password" id="pa" placeholder="Clave">
-    <button onclick="login('l')">ENTRAR LENTAMENTE</button>
-    <button onclick="login('r')" style="background:#333">CREAR CUENTA</button>
-</div>
-
-<div id="app" style="display:none;">
-    <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <button onclick="setTheme('light')" style="background:#eee; color:#000; flex:1">☀️ Claro</button>
-        <button onclick="setTheme('dark')" style="background:#222; color:#fff; flex:1">🌑 Negro</button>
-        <button onclick="verCal()" style="background:var(--i); flex:2">📅 HISTORIAL DETALLADO</button>
-    </div>
-
-    <div class="total-box" id="pat">...</div>
-
-    <div class="card">
-        <h3>💰 Mis Cuentas</h3>
-        <div class="input-row"><img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="t" step="0.01" placeholder="Tasa BCV"></div>
-        <div class="input-row"><img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bi" placeholder="Binance $"></div>
-        <div class="input-row"><img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bn" placeholder="BNC $"></div>
-        <div class="input-row"><img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="ba" placeholder="Bancaribe $"></div>
-        <div class="input-row"><img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="fi" placeholder="Efectivo $"></div>
-        <div class="input-row"><img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bo" placeholder="Monto Bs."></div>
-        <button onclick="guardar()">💾 GUARDAR Y RESPALDAR DÍA</button>
-    </div>
-
-    <div class="card">
-        <h3>✍️ Operación</h3>
-        <select id="ot"><option value="p">Prestar</option><option value="c">Cobrar / Entra $</option></select>
-        <input type="text" id="on" placeholder="Nombre">
-        <input type="number" id="om" placeholder="Monto $">
-        <button onclick="op()">REGISTRAR OPERACIÓN</button>
-    </div>
-
-    <div class="card">
-        <h3>👥 Deudores Actuales</h3>
-        <div id="lista"></div>
-    </div>
-
-    <button style="background:#e74c3c" onclick="signOut(auth)">SALIR LENTAMENTE</button>
-</div>
-
-<div id="modal-h"></div>
-
 </body>
 </html>
