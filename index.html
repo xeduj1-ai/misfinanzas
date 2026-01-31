@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,8 +11,14 @@
     <title>Cartera Pro v23</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -73,7 +80,7 @@
             min-height: 2.6rem;
         }
 
-        .cursor { 
+        .cursor {
             display: inline-block;
             width: 3px;
             height: 1.8rem;
@@ -83,7 +90,18 @@
             vertical-align: middle;
         }
 
-        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
 
         .auth-subtitle {
             color: var(--text-secondary);
@@ -100,14 +118,17 @@
         }
 
         @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .input-field {
             width: 100%;
             padding: 16px 20px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             color: #fff;
             font-size: 16px;
@@ -118,11 +139,13 @@
 
         .input-field:focus {
             border-color: var(--accent);
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .input-field::placeholder { color: rgba(255,255,255,0.5); }
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
 
         .btn {
             width: 100%;
@@ -141,14 +164,19 @@
             color: #fff;
         }
 
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
 
         .btn-secondary {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text-secondary);
         }
 
-        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
         /* Loading Overlay */
         .loading-overlay {
@@ -162,7 +190,9 @@
             backdrop-filter: blur(8px);
         }
 
-        .loading-overlay.active { display: flex; }
+        .loading-overlay.active {
+            display: flex;
+        }
 
         .spinner {
             width: 50px;
@@ -173,7 +203,11 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Main App */
         #app {
@@ -211,8 +245,15 @@
             transition: all 0.3s ease;
         }
 
-        .theme-btn:hover { border-color: var(--accent); }
-        .theme-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .theme-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .theme-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
 
         /* Total Box */
         .total-box {
@@ -263,7 +304,9 @@
             transition: all 0.3s ease;
         }
 
-        .card:hover { border-color: var(--accent); }
+        .card:hover {
+            border-color: var(--accent);
+        }
 
         .card-title {
             font-size: 1.1rem;
@@ -274,7 +317,9 @@
             gap: 10px;
         }
 
-        .card-title span { font-size: 1.3rem; }
+        .card-title span {
+            font-size: 1.3rem;
+        }
 
         /* Input Groups */
         .input-group {
@@ -293,7 +338,8 @@
             z-index: 1;
         }
 
-        .input-group input, .input-group select {
+        .input-group input,
+        .input-group select {
             width: 100%;
             padding: 14px 14px 14px 48px;
             background: var(--bg-secondary);
@@ -305,12 +351,15 @@
             transition: all 0.3s ease;
         }
 
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus,
+        .input-group select:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .input-group input::placeholder { color: var(--text-secondary); }
+        .input-group input::placeholder {
+            color: var(--text-secondary);
+        }
 
         .input-label {
             font-size: 0.75rem;
@@ -334,8 +383,16 @@
             transition: all 0.3s ease;
         }
 
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--accent-glow); }
-        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         /* Debt List */
         .debt-item {
@@ -349,8 +406,15 @@
             border-left: 4px solid var(--blue);
         }
 
-        .debt-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
-        .debt-info small { color: var(--text-secondary); font-size: 0.8rem; }
+        .debt-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .debt-info small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
 
         .debt-badge {
             font-size: 0.7rem;
@@ -359,8 +423,15 @@
             margin-left: 8px;
         }
 
-        .badge-warning { background: var(--warning); color: #000; }
-        .badge-danger { background: var(--danger); color: #fff; }
+        .badge-warning {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .badge-danger {
+            background: var(--danger);
+            color: #fff;
+        }
 
         .debt-actions {
             display: flex;
@@ -385,7 +456,9 @@
             transition: all 0.3s ease;
         }
 
-        .btn-small:hover { opacity: 0.9; }
+        .btn-small:hover {
+            opacity: 0.9;
+        }
 
         /* Calendar */
         .calendar-header {
@@ -410,7 +483,9 @@
             transition: all 0.3s ease;
         }
 
-        .calendar-nav button:hover { border-color: var(--accent); }
+        .calendar-nav button:hover {
+            border-color: var(--accent);
+        }
 
         .calendar-month {
             font-size: 1.1rem;
@@ -444,8 +519,16 @@
             position: relative;
         }
 
-        .calendar-day:hover { background: var(--accent); color: #fff; }
-        .calendar-day.today { border: 2px solid var(--accent); font-weight: 600; }
+        .calendar-day:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--accent);
+            font-weight: 600;
+        }
+
         .calendar-day.has-data::after {
             content: '';
             position: absolute;
@@ -455,14 +538,22 @@
             background: var(--accent);
             border-radius: 50%;
         }
-        .calendar-day.empty { background: transparent; cursor: default; }
-        .calendar-day.empty:hover { background: transparent; }
+
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.empty:hover {
+            background: transparent;
+            cursor: default;
+        }
 
         /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
@@ -471,7 +562,9 @@
             padding: 20px;
         }
 
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
 
         .modal {
             background: var(--bg-card);
@@ -486,8 +579,15 @@
         }
 
         @keyframes modalIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal-header {
@@ -497,7 +597,10 @@
             margin-bottom: 20px;
         }
 
-        .modal-title { font-size: 1.2rem; font-weight: 600; }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
 
         .modal-close {
             width: 36px;
@@ -511,7 +614,10 @@
             transition: all 0.3s ease;
         }
 
-        .modal-close:hover { background: var(--danger); color: #fff; }
+        .modal-close:hover {
+            background: var(--danger);
+            color: #fff;
+        }
 
         .detail-row {
             display: flex;
@@ -520,10 +626,22 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .detail-row:last-child { border-bottom: none; }
-        .detail-label { color: var(--text-secondary); }
-        .detail-value { font-weight: 600; }
-        .detail-value.highlight { color: var(--accent); font-size: 1.1rem; }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .detail-value.highlight {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
 
         /* Logout */
         .btn-logout {
@@ -540,8 +658,16 @@
         }
 
         /* Grid Layout */
-        .grid { display: grid; gap: 16px; }
-        @media (min-width: 768px) { .grid-cols-2 { grid-template-columns: repeat(2, 1fr); } }
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
         /* Toast */
         .toast {
@@ -558,11 +684,135 @@
             transition: all 0.4s ease;
         }
 
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Enhanced Payment Modal Styles */
+        .payment-modal-enhanced {
+            max-width: 450px !important;
+            padding: 24px !important;
+        }
+
+        .payment-info-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .payment-amount-section {
+            margin-bottom: 24px;
+        }
+
+        .payment-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .payment-currency-icon {
+            position: absolute;
+            left: 16px;
+            font-size: 1.5rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .payment-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 16px 16px 40px;
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .payment-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .payment-question {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+
+        .payment-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .payment-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 8px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            color: #1e293b;
+            min-height: 100px;
+        }
+
+        .payment-btn:active {
+            transform: scale(0.96);
+        }
+
+        .payment-btn-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .payment-btn-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .payment-btn-sub {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        .payment-btn-efectivo {
+            background: #10b981;
+            /* Green */
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .payment-btn-binance {
+            background: #F0B90B;
+            /* Binance Yellow */
+            box-shadow: 0 4px 20px rgba(240, 185, 11, 0.3);
+        }
+
+        .payment-btn-bolivares {
+            background: #3b82f6;
+            /* Blue */
+            color: white;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
     </style>
 </head>
+
 <body>
-    <div class="loading-overlay" id="loading"><div class="spinner"></div></div>
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+    </div>
 
     <div id="auth-screen">
         <div class="auth-container">
@@ -625,29 +875,15 @@
 
             <div>
                 <div class="card">
-                    <h3 class="card-title"><span>✍️</span> Nueva Operación</h3>
-                    <div class="input-group">
-                        <select id="tipo-op">
-                            <option value="prestamo">Prestar (Sale Efectivo)</option>
-                            <option value="entrada">Entrada $ (Sube Efectivo)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="desc-op" placeholder="Nombre / Concepto" style="padding-left:14px">
-                    </div>
-                    <div class="input-group">
-                        <input type="number" id="monto-op" placeholder="Monto $" style="padding-left:14px">
-                    </div>
-                    <button class="btn-save" onclick="AppData.registerOperation()">REGISTRAR</button>
-                </div>
-
-                <div class="card">
                     <h3 class="card-title"><span>👥</span> Deudores</h3>
                     <div id="debt-list"></div>
-                    <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                    <div
+                        style="display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
                         <span>Total por cobrar:</span>
                         <span id="total-debt" style="color:var(--danger);font-weight:600">$0.00</span>
                     </div>
+                    <button class="btn-save" style="margin-top:12px;background:var(--blue)"
+                        onclick="UI.openModal('loan-modal')">➕ REGISTRAR NUEVO PRÉSTAMO</button>
                 </div>
             </div>
         </div>
@@ -680,13 +916,142 @@
         </div>
     </div>
 
+    <!-- Modal: Nuevo Préstamo -->
+    <div class="modal-overlay" id="loan-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">💸 Registrar Préstamo</h3>
+                <button class="modal-close" onclick="UI.closeModal('loan-modal')">×</button>
+            </div>
+            <div style="margin-bottom:12px">
+                <label class="input-label">Nombre del deudor</label>
+                <input type="text" id="loan-name" class="input-field" placeholder="Ej: Juan Pérez"
+                    style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)">
+            </div>
+            <div style="margin-bottom:12px">
+                <label class="input-label">Monto en USD</label>
+                <input type="number" id="loan-amount" class="input-field" placeholder="Ej: 50"
+                    style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)">
+            </div>
+            <div style="margin-bottom:16px">
+                <label class="input-label">Fecha del préstamo</label>
+                <input type="date" id="loan-date" class="input-field"
+                    style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)">
+            </div>
+            <button class="btn-save" onclick="AppData.registerLoan()">REGISTRAR PRÉSTAMO</button>
+        </div>
+    </div>
+
+    <!-- Modal: Abonar Deuda (Elegante con 3 opciones) -->
+    <div class="modal-overlay" id="payment-modal">
+        <div class="modal payment-modal-enhanced">
+            <div class="modal-header">
+                <h3 class="modal-title" id="payment-title">💵 Registrar Abono</h3>
+                <button class="modal-close" onclick="UI.closeModal('payment-modal')">×</button>
+            </div>
+
+            <!-- Info del deudor -->
+            <div id="payment-debt-info" class="payment-info-card"></div>
+
+            <!-- Campo de monto -->
+            <div class="payment-amount-section">
+                <label class="input-label">Monto del abono</label>
+                <div class="payment-input-wrapper">
+                    <span class="payment-currency-icon">$</span>
+                    <input type="number" id="payment-amount" class="payment-input" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+
+            <!-- Pregunta de destino -->
+            <p class="payment-question">¿A qué cuenta va el dinero?</p>
+
+            <!-- Botones de destino -->
+            <div class="payment-buttons-grid">
+                <button class="payment-btn payment-btn-efectivo" onclick="AppData.processPayment('EFECTIVO')">
+                    <span class="payment-btn-icon">💵</span>
+                    <span class="payment-btn-label">Efectivo</span>
+                    <span class="payment-btn-sub">USD</span>
+                </button>
+
+                <button class="payment-btn payment-btn-binance" onclick="AppData.processPayment('BINANCE')">
+                    <span class="payment-btn-icon">🟡</span>
+                    <span class="payment-btn-label">Binance</span>
+                    <span class="payment-btn-sub">USD</span>
+                </button>
+
+                <button class="payment-btn payment-btn-bolivares" onclick="AppData.processPayment('BS')">
+                    <span class="payment-btn-icon">📱</span>
+                    <span class="payment-btn-label">Pago Móvil</span>
+                    <span class="payment-btn-sub" id="payment-tasa-preview">Bs</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Perfil del Deudor -->
+    <div class="modal-overlay" id="deudor-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="deudor-nombre">👤 Perfil</h3>
+                <button class="modal-close" onclick="UI.closeModal('deudor-modal')">×</button>
+            </div>
+
+            <div class="payment-info-card" style="margin-bottom: 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="color:var(--text-secondary)">Deuda Actual</span>
+                    <span id="deudor-monto-total"
+                        style="font-size:1.8rem;font-weight:700;color:var(--danger)">$0.00</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.9rem">
+                    <span style="color:var(--text-secondary)">Fecha inicio:</span>
+                    <span id="deudor-fecha-inicio" style="color:var(--text-primary)">-</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2" style="margin-bottom:24px">
+                <button class="btn-save"
+                    style="margin:0;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)"
+                    onclick="AppData.showPrestarMas()">
+                    ➕ Prestar más
+                </button>
+                <button class="btn-save" style="margin:0" onclick="AppData.prepareAbonoFromProfile()">
+                    💵 Abonar
+                </button>
+            </div>
+
+            <!-- Sección oculta para prestar más -->
+            <div id="prestar-mas-section"
+                style="display:none;background:rgba(255,255,255,0.05);padding:16px;border-radius:12px;margin-bottom:20px;animation:modalIn 0.3s ease">
+                <label class="input-label">Monto adicional a prestar ($)</label>
+                <div class="input-group">
+                    <input type="number" id="extra-loan-amount" placeholder="0.00" class="input-field" style="margin:0">
+                </div>
+                <button class="btn-save" style="margin-top:8px" onclick="AppData.executePrestarMas()">CONFIRMAR
+                    PRÉSTAMO</button>
+            </div>
+
+            <h4
+                style="margin-bottom:12px;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:1px">
+                Historial de Movimientos</h4>
+            <div id="deudor-historial-list" style="max-height:200px;overflow-y:auto;padding-right:4px">
+                <!-- Items de historial inyectados por JS -->
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script type="module">
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // CARTERA PRO v23 - SCRIPT COMPLETO INLINE
+        // Todas las funciones integradas para funcionamiento directo en navegador
+        // ═══════════════════════════════════════════════════════════════════════════════
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyA-FSYVbeYlIIJYBD9QrcMqxsgBZGLr3ek",
             authDomain: "mi-cartera-3ce50.firebaseapp.com",
@@ -700,12 +1065,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // State
-        let userData = { saldos: { tasa: 37, binance: 0, bnc: 0, bancaribe: 0, fisico: 0, bolivares: 0 }, eventos: [] };
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // ESTADO GLOBAL
+        // ═══════════════════════════════════════════════════════════════════════════════
+        let userData = {
+            saldos: { tasa: 0, binance: 0, bnc: 0, bancaribe: 0, fisico: 0, bolivares: 0 },
+            eventos: []
+        };
         let historialData = {};
         let calendarDate = new Date();
+        let currentDeudorIndex = null;
 
-        // UI Controller
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // CONTROLADOR DE INTERFAZ (UI)
+        // ═══════════════════════════════════════════════════════════════════════════════
         window.UI = {
             setTheme(mode) {
                 document.body.classList.toggle('light-theme', mode === 'light');
@@ -734,15 +1107,33 @@
                     }
                 };
                 setTimeout(type, 500);
+            },
+            // 1. REACTIVIDAD EN TIEMPO REAL - Event listeners para actualización instantánea
+            initReactivity() {
+                const fields = ['tasa', 'binance', 'bnc', 'bancaribe', 'fisico', 'bolivares'];
+                fields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', () => {
+                            const val = parseFloat(el.value);
+                            userData.saldos[id] = isNaN(val) ? 0 : val;
+                            AppData.renderTotalsOnly();
+                        });
+                    }
+                });
             }
         };
 
-        // App Logic
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // LÓGICA DE NEGOCIO (AppLogic)
+        // ═══════════════════════════════════════════════════════════════════════════════
         window.AppLogic = {
             calculate() {
                 const s = userData.saldos;
                 let debtTotal = 0;
-                userData.eventos.forEach(e => { if (e.tipo === 'p' && !e.c) debtTotal += (e.monto || 0); });
+                if (userData.eventos) {
+                    userData.eventos.forEach(e => { if (e.tipo === 'p' && !e.c) debtTotal += (e.monto || 0); });
+                }
                 const tasa = s.tasa || 1;
                 const total = (s.binance || 0) + (s.bnc || 0) + (s.bancaribe || 0) + (s.fisico || 0) + debtTotal + ((s.bolivares || 0) / tasa);
                 return { total, debtTotal, tasa };
@@ -750,8 +1141,10 @@
             formatMoney(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
             daysSince(dateStr) {
                 if (!dateStr) return 0;
-                const parts = dateStr.split('-');
-                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
+                let d;
+                if (parts[0].length === 4) d = new Date(parts[0], parts[1] - 1, parts[2]);
+                else d = new Date(parts[2], parts[1] - 1, parts[0]);
                 return Math.floor((new Date() - d) / (1000 * 60 * 60 * 24));
             },
             validate() {
@@ -761,184 +1154,426 @@
             }
         };
 
-        // Auth
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // 5. MÓDULO DE AUTENTICACIÓN CON COMENTARIOS DETALLADOS
+        // ═══════════════════════════════════════════════════════════════════════════════
         window.AppAuth = {
+            /**
+             * FUNCIÓN: login() - Inicio de sesión con Firebase Authentication
+             * 
+             * FLUJO PASO A PASO:
+             * 1. Obtener email y contraseña de los campos
+             * 2. Validar que no estén vacíos
+             * 3. Mostrar indicador de carga
+             * 4. Enviar credenciales a Firebase
+             * 5. Firebase valida contra su base de datos
+             * 6. Si es exitoso: onAuthStateChanged detecta el cambio
+             * 7. Si falla: mostrar error traducido
+             */
             async login() {
-                const email = document.getElementById('auth-email').value.trim();
-                const pass = document.getElementById('auth-pass').value;
-                if (!email || !pass) return UI.toast('⚠️ Completa todos los campos');
+                // Paso 1: Obtener referencias a los campos del formulario
+                const emailField = document.getElementById('auth-email');
+                const passField = document.getElementById('auth-pass');
+
+                // Paso 2: Extraer valores (trim elimina espacios)
+                const email = emailField.value.trim();
+                const password = passField.value;
+
+                // Paso 3: Validación local antes de llamar a Firebase
+                if (!email || !password) {
+                    UI.toast('⚠️ Completa el correo y la contraseña');
+                    return;
+                }
+
+                // Paso 4: Mostrar indicador de carga
                 UI.showLoading();
+
                 try {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                } catch (e) { UI.hideLoading(); UI.toast('❌ ' + e.message); }
+                    // Paso 5: Llamar a Firebase Auth
+                    // Firebase hashea la contraseña, la compara y genera un JWT
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // Si llegamos aquí, el login fue exitoso
+                    // onAuthStateChanged se encarga del resto
+                } catch (error) {
+                    // Paso 7: Manejar errores
+                    UI.hideLoading();
+                    let msg = 'Error de autenticación';
+                    if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
+                    if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
+                    if (error.code === 'auth/invalid-email') msg = 'Email inválido';
+                    if (error.code === 'auth/invalid-credential') msg = 'Credenciales inválidas';
+                    UI.toast('❌ ' + msg);
+                }
             },
+
             async register() {
                 const email = document.getElementById('auth-email').value.trim();
-                const pass = document.getElementById('auth-pass').value;
-                if (!email || !pass) return UI.toast('⚠️ Completa todos los campos');
+                const password = document.getElementById('auth-pass').value;
+                if (!email || !password) return UI.toast('⚠️ Completa todos los campos');
+                if (password.length < 6) return UI.toast('⚠️ La contraseña debe tener al menos 6 caracteres');
+
                 UI.showLoading();
                 try {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                } catch (e) { UI.hideLoading(); UI.toast('❌ ' + e.message); }
+                    await createUserWithEmailAndPassword(auth, email, password);
+                } catch (e) {
+                    UI.hideLoading();
+                    UI.toast('❌ ' + e.message);
+                }
             },
+
             logout() { signOut(auth); }
         };
 
-        // Data
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // GESTIÓN DE DATOS (AppData)
+        // ═══════════════════════════════════════════════════════════════════════════════
         window.AppData = {
+            // 6. ESTABILIDAD - Render inteligente que no sobrescribe inputs enfocados
             render() {
                 const s = userData.saldos;
-                document.getElementById('tasa').value = s.tasa || '';
-                document.getElementById('binance').value = s.binance || '';
-                document.getElementById('bnc').value = s.bnc || '';
-                document.getElementById('bancaribe').value = s.bancaribe || '';
-                document.getElementById('fisico').value = s.fisico || '';
-                document.getElementById('bolivares').value = s.bolivares || '';
+                const active = document.activeElement ? document.activeElement.id : '';
 
+                if (active !== 'tasa') document.getElementById('tasa').value = s.tasa || '';
+                if (active !== 'binance') document.getElementById('binance').value = s.binance || '';
+                if (active !== 'bnc') document.getElementById('bnc').value = s.bnc || '';
+                if (active !== 'bancaribe') document.getElementById('bancaribe').value = s.bancaribe || '';
+                if (active !== 'fisico') document.getElementById('fisico').value = s.fisico || '';
+                if (active !== 'bolivares') document.getElementById('bolivares').value = s.bolivares || '';
+
+                this.renderTotalsOnly();
+                this.renderDebts();
+            },
+
+            // 1. PATRIMONIO INSTANTÁNEO - Actualiza solo totales sin tocar inputs
+            renderTotalsOnly() {
                 const { total, debtTotal, tasa } = AppLogic.calculate();
                 document.getElementById('total-usd').textContent = '$' + AppLogic.formatMoney(total);
                 document.getElementById('total-bs').textContent = 'Bs. ' + AppLogic.formatMoney(total * tasa);
                 document.getElementById('total-debt').textContent = '$' + AppLogic.formatMoney(debtTotal);
-
-                let debtHTML = '';
-                userData.eventos.forEach((e, i) => {
-                    if (e.tipo === 'p' && !e.c) {
-                        const days = AppLogic.daysSince(e.f);
-                        let badge = '';
-                        if (days > 30) badge = '<span class="debt-badge badge-danger">' + days + ' días</span>';
-                        else if (days > 7) badge = '<span class="debt-badge badge-warning">' + days + ' días</span>';
-                        debtHTML += `<div class="debt-item">
-                            <div class="debt-info"><h4>${e.desc}${badge}</h4><small>${e.f || 'Sin fecha'}</small></div>
-                            <div class="debt-actions">
-                                <span class="debt-amount">$${AppLogic.formatMoney(e.monto || 0)}</span>
-                                <button class="btn-small" onclick="AppData.pay(${i})">Abonar</button>
-                            </div>
-                        </div>`;
-                    }
-                });
-                document.getElementById('debt-list').innerHTML = debtHTML || '<p style="color:var(--text-secondary);text-align:center">Sin deudas pendientes</p>';
             },
+
+            renderDebts() {
+                let debtHTML = '';
+                if (userData.eventos) {
+                    userData.eventos.forEach((e, i) => {
+                        if (e.tipo === 'p' && !e.c) {
+                            const days = AppLogic.daysSince(e.f);
+                            let badge = '';
+                            if (days > 30) badge = '<span class="debt-badge badge-danger">' + days + ' d</span>';
+                            else if (days > 7) badge = '<span class="debt-badge badge-warning">' + days + ' d</span>';
+
+                            debtHTML += `<div class="debt-item" onclick="AppData.openDeudorProfile(${i})">
+                                <div class="debt-info"><h4>${e.desc}${badge}</h4><small>${e.f || 'S/F'}</small></div>
+                                <div class="debt-actions">
+                                    <span class="debt-amount">$${AppLogic.formatMoney(e.monto || 0)}</span>
+                                    <button class="btn-small" onclick="event.stopPropagation(); AppData.openPaymentModal(${i})">Abonar</button>
+                                </div>
+                            </div>`;
+                        }
+                    });
+                }
+                document.getElementById('debt-list').innerHTML = debtHTML || '<p style="text-align:center;color:var(--text-secondary)">Sin deudas</p>';
+            },
+
             async save() {
-                if (!AppLogic.validate()) return;
-                UI.showLoading();
-                const uid = auth.currentUser.uid;
                 userData.saldos = {
-                    tasa: parseFloat(document.getElementById('tasa').value) || 1,
+                    tasa: parseFloat(document.getElementById('tasa').value) || 0,
                     binance: parseFloat(document.getElementById('binance').value) || 0,
                     bnc: parseFloat(document.getElementById('bnc').value) || 0,
                     bancaribe: parseFloat(document.getElementById('bancaribe').value) || 0,
                     fisico: parseFloat(document.getElementById('fisico').value) || 0,
                     bolivares: parseFloat(document.getElementById('bolivares').value) || 0
                 };
+
+                if (!AppLogic.validate()) return;
+                UI.showLoading();
+
+                const uid = auth.currentUser.uid;
                 const hoy = new Date();
-                const fecha = hoy.toLocaleDateString('es-ES').replace(/\//g, '-');
-                const { total } = AppLogic.calculate();
+                const fechaHoy = String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear();
+                const { total, debtTotal } = AppLogic.calculate();
+
+                const deudores = userData.eventos.filter(e => e.tipo === 'p' && !e.c).map(e => ({
+                    nombre: e.desc, monto: e.monto, desde: e.f
+                }));
+
                 try {
                     await setDoc(doc(db, "usuarios", uid), userData);
-                    await setDoc(doc(db, "usuarios", uid, "historial", fecha), {
-                        fecha, total, ...userData.saldos
+                    await setDoc(doc(db, "usuarios", uid, "historial", fechaHoy), {
+                        fecha: fechaHoy, total, deudaTotal: debtTotal, deudores,
+                        movimientos: userData.eventos, ...userData.saldos
                     });
-                    UI.toast('✅ Guardado: $' + AppLogic.formatMoney(total));
-                } catch (e) { UI.toast('❌ Error: ' + e.message); }
+                    historialData[fechaHoy] = { total };
+                    UI.toast('✅ Guardado');
+                } catch (e) {
+                    UI.toast('❌ ' + e.message);
+                }
                 UI.hideLoading();
             },
-            async registerOperation() {
-                const tipo = document.getElementById('tipo-op').value;
-                const desc = document.getElementById('desc-op').value.trim() || 'Sin nombre';
-                const monto = parseFloat(document.getElementById('monto-op').value);
-                if (!monto || monto <= 0) return UI.toast('⚠️ Monto inválido');
-                
-                if (tipo === 'prestamo') userData.saldos.fisico -= monto;
-                else userData.saldos.fisico += monto;
 
-                const hoy = new Date();
-                const f = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
-                userData.eventos.push({ tipo: tipo === 'prestamo' ? 'p' : 'c', monto, desc, c: false, f });
+            // 2. PERFIL DE DEUDOR - Modal con historial y acciones
+            openDeudorProfile(index) {
+                currentDeudorIndex = index;
+                const e = userData.eventos[index];
+                document.getElementById('deudor-nombre').textContent = e.desc;
+                document.getElementById('deudor-monto-total').textContent = '$' + AppLogic.formatMoney(e.monto);
+                document.getElementById('deudor-fecha-inicio').textContent = e.f;
+                document.getElementById('prestar-mas-section').style.display = 'none';
 
-                document.getElementById('desc-op').value = '';
-                document.getElementById('monto-op').value = '';
-                await this.save();
+                const history = userData.eventos.filter(ev => ev.desc === e.desc).reverse();
+                let html = '';
+                history.forEach(h => {
+                    let icon = '⚪', color = '#fff', sign = '';
+                    if (h.tipo === 'p') { icon = '🔴'; color = 'var(--danger)'; sign = '+ Deuda'; }
+                    if (h.tipo === 'a') { icon = '🟢'; color = 'var(--accent)'; sign = '- Abono'; }
+                    html += `<div style="background:var(--bg-secondary);padding:8px;margin-bottom:6px;border-radius:6px;font-size:0.85rem">
+                        <div style="display:flex;justify-content:space-between"><span>${icon} ${sign}</span><strong style="color:${color}">$${AppLogic.formatMoney(h.monto)}</strong></div>
+                        <div style="font-size:0.75rem;color:#888">${h.f} ${h.detalle || ''}</div>
+                     </div>`;
+                });
+                document.getElementById('deudor-historial-list').innerHTML = html;
+                UI.openModal('deudor-modal');
             },
-            async pay(idx) {
+
+            showPrestarMas() { document.getElementById('prestar-mas-section').style.display = 'block'; },
+
+            executePrestarMas() {
+                const val = parseFloat(document.getElementById('extra-loan-amount').value);
+                if (!val || val <= 0) return UI.toast('⚠️ Monto inválido');
+                const deudor = userData.eventos[currentDeudorIndex];
+
+                userData.saldos.fisico -= val;
+                deudor.monto += val;
+
+                userData.eventos.push({
+                    tipo: 'p', monto: val, desc: deudor.desc, c: true,
+                    detalle: 'Préstamo Adicional', f: new Date().toLocaleDateString('es-ES').replace(/\//g, '-')
+                });
+
+                document.getElementById('extra-loan-amount').value = '';
+                this.openDeudorProfile(currentDeudorIndex);
+                this.renderTotalsOnly();
+                this.save();
+            },
+
+            prepareAbonoFromProfile() {
+                UI.closeModal('deudor-modal');
+                this.openPaymentModal(currentDeudorIndex);
+            },
+
+            openPaymentModal(idx) {
+                currentDeudorIndex = idx;
                 const e = userData.eventos[idx];
-                const val = parseFloat(prompt(`¿Cuánto abona ${e.desc}? (Deuda: $${e.monto})`));
-                if (!val || val <= 0) return;
-                userData.saldos.fisico += val;
-                e.monto -= val;
-                if (e.monto <= 0) e.c = true;
+                document.getElementById('payment-title').textContent = 'Abonar a ' + e.desc;
+                document.getElementById('payment-debt-info').innerHTML = `<h2 style="color:var(--danger);text-align:center">$${AppLogic.formatMoney(e.monto)}</h2>`;
+                const prev = document.getElementById('payment-tasa-preview');
+                if (prev) prev.textContent = 'Bs. ' + (userData.saldos.tasa || 0);
+                document.getElementById('payment-amount').value = '';
+                UI.openModal('payment-modal');
+                setTimeout(() => document.getElementById('payment-amount').focus(), 100);
+            },
+
+            // 3. CONVERSIÓN INVERSA - Si paga en Bs, el input es en Bs y se divide por tasa
+            async processPayment(method) {
+                if (currentDeudorIndex === null) return;
+                const e = userData.eventos[currentDeudorIndex];
+                const val = parseFloat(document.getElementById('payment-amount').value);
+                if (!val || val <= 0) return UI.toast('⚠️ Ingresa un monto válido');
+
+                const tasa = userData.saldos.tasa || 1;
+                let montoUSD, montoReal, detalle = '';
+
+                if (method === 'BS') {
+                    // CONVERSIÓN INVERSA: el usuario ingresa BOLÍVARES
+                    // montoUSD = bolívares / tasa
+                    montoUSD = val / tasa;
+                    montoReal = val;
+                    userData.saldos.bolivares += val;
+                    detalle = `Pago Móvil: Bs. ${AppLogic.formatMoney(val)} (= $${AppLogic.formatMoney(montoUSD)} @ Tasa ${tasa})`;
+                    document.getElementById('bolivares').value = userData.saldos.bolivares;
+                } else if (method === 'EFECTIVO') {
+                    montoUSD = val;
+                    montoReal = val;
+                    userData.saldos.fisico += val;
+                    detalle = 'Efectivo USD';
+                    document.getElementById('fisico').value = userData.saldos.fisico;
+                } else if (method === 'BINANCE') {
+                    montoUSD = val;
+                    montoReal = val;
+                    userData.saldos.binance += val;
+                    detalle = 'Binance USDT';
+                    document.getElementById('binance').value = userData.saldos.binance;
+                }
+
+                e.monto -= montoUSD;
+                let cerrado = false;
+                if (e.monto <= 0.01) { e.monto = 0; e.c = true; cerrado = true; }
+
+                userData.eventos.push({
+                    tipo: 'a', monto: montoUSD, montoOriginal: montoReal, moneda: method,
+                    desc: e.desc, detalle, tasaUsada: tasa,
+                    f: new Date().toLocaleDateString('es-ES').replace(/\//g, '-')
+                });
+
+                UI.closeModal('payment-modal');
+                const msgMonto = method === 'BS' ? `Bs. ${AppLogic.formatMoney(montoReal)} (≈ $${AppLogic.formatMoney(montoUSD)})` : `$${AppLogic.formatMoney(montoReal)}`;
+                UI.toast(cerrado ? `🎉 ¡Deuda saldada! ${msgMonto}` : `✅ Abono: ${msgMonto}`);
                 await this.save();
+                this.render();
+            },
+
+            async registerLoan() {
+                const user = document.getElementById('loan-name').value;
+                const monto = parseFloat(document.getElementById('loan-amount').value);
+                const dateVal = document.getElementById('loan-date').value;
+                if (!user || !monto) return UI.toast('Datos inválidos');
+
+                let f = dateVal ? dateVal.split('-').reverse().join('-') : new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+
+                userData.saldos.fisico -= monto;
+                userData.eventos.push({ tipo: 'p', monto, desc: user, c: false, f });
+
+                UI.closeModal('loan-modal');
+                document.getElementById('loan-name').value = '';
+                document.getElementById('loan-amount').value = '';
+                await this.save();
+                this.render();
             }
         };
 
-        // Calendar
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // CALENDARIO CON ELIMINACIÓN DE REGISTROS
+        // ═══════════════════════════════════════════════════════════════════════════════
         window.Calendar = {
-            open() {
-                UI.openModal('calendar-modal');
-                this.render();
-            },
+            async open() { UI.openModal('calendar-modal'); await this.load(); this.render(); },
             close() { UI.closeModal('calendar-modal'); },
             prev() { calendarDate.setMonth(calendarDate.getMonth() - 1); this.render(); },
             next() { calendarDate.setMonth(calendarDate.getMonth() + 1); this.render(); },
-            async render() {
-                const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-                document.getElementById('calendar-month').textContent = meses[calendarDate.getMonth()] + ' ' + calendarDate.getFullYear();
+            async load() {
+                const q = query(collection(db, "usuarios", auth.currentUser.uid, "historial"));
+                const s = await getDocs(q);
+                historialData = {}; s.forEach(d => historialData[d.id] = d.data());
+            },
+            render() {
+                const m = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                document.getElementById('calendar-month').textContent = m[calendarDate.getMonth()] + ' ' + calendarDate.getFullYear();
+                const g = document.getElementById('calendar-grid');
+                g.innerHTML = ['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(x => `<div class="calendar-day-header">${x}</div>`).join('');
 
-                const grid = document.getElementById('calendar-grid');
-                grid.innerHTML = ['D','L','M','M','J','V','S'].map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+                const y = calendarDate.getFullYear(), mo = calendarDate.getMonth();
+                const first = new Date(y, mo, 1).getDay();
+                const days = new Date(y, mo + 1, 0).getDate();
 
-                const year = calendarDate.getFullYear();
-                const month = calendarDate.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
-
-                for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="calendar-day empty"></div>';
-
-                for (let d = 1; d <= daysInMonth; d++) {
-                    const dateStr = String(d).padStart(2, '0') + '-' + String(month + 1).padStart(2, '0') + '-' + year;
-                    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-                    const hasData = historialData[dateStr];
-                    grid.innerHTML += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasData ? 'has-data' : ''}" onclick="Calendar.showDay('${dateStr}')">${d}</div>`;
+                for (let i = 0; i < first; i++) g.innerHTML += '<div class="calendar-day empty"></div>';
+                for (let d = 1; d <= days; d++) {
+                    const k = String(d).padStart(2, '0') + '-' + String(mo + 1).padStart(2, '0') + '-' + y;
+                    g.innerHTML += `<div class="calendar-day ${historialData[k] ? 'has-data' : ''}" onclick="Calendar.showDay('${k}')">${d}</div>`;
                 }
             },
-            async loadHistorial() {
-                try {
-                    const snap = await getDocs(query(collection(db, "usuarios", auth.currentUser.uid, "historial")));
-                    historialData = {};
-                    snap.forEach(d => { historialData[d.id] = d.data(); });
-                } catch (e) { console.error(e); }
-            },
-            showDay(fecha) {
-                const data = historialData[fecha];
-                if (!data) return UI.toast('📭 Sin datos para ' + fecha);
-                document.getElementById('day-modal-title').textContent = '📊 ' + fecha;
-                const fmt = n => AppLogic.formatMoney(n || 0);
-                document.getElementById('day-modal-content').innerHTML = `
-                    <div class="detail-row"><span class="detail-label">Tasa BCV</span><span class="detail-value">${fmt(data.tasa)} Bs/$</span></div>
-                    <div class="detail-row"><span class="detail-label">Binance</span><span class="detail-value">$${fmt(data.binance)}</span></div>
-                    <div class="detail-row"><span class="detail-label">BNC</span><span class="detail-value">$${fmt(data.bnc)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Bancaribe</span><span class="detail-value">$${fmt(data.bancaribe)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Efectivo</span><span class="detail-value">$${fmt(data.fisico)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Bolívares</span><span class="detail-value">Bs. ${fmt(data.bolivares)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value highlight">$${fmt(data.total)}</span></div>
-                `;
+            // 4. GESTIÓN DEL HISTORIAL - Mostrar detalles completos del día
+            showDay(k) {
+                const d = historialData[k];
+                if (!d) return UI.toast('Sin datos para esta fecha');
+
+                // Título con fecha y botón borrar
+                document.getElementById('day-modal-title').innerHTML = `📅 ${k} <button class="btn-small" style="background:var(--danger);float:right" onclick="Calendar.del('${k}')">🗑️</button>`;
+
+                let h = '';
+
+                // Sección: Patrimonio Total
+                h += `<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:16px;border-radius:12px;text-align:center;margin-bottom:16px;border:1px solid var(--accent)">
+                    <div style="font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase">Patrimonio Total</div>
+                    <div style="font-size:1.8rem;font-weight:700;color:var(--accent)">$${AppLogic.formatMoney(d.total || 0)}</div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">Bs. ${AppLogic.formatMoney((d.total || 0) * (d.tasa || 1))}</div>
+                </div>`;
+
+                // Sección: Tasa del día
+                if (d.tasa) {
+                    h += `<div class="detail-row"><span class="detail-label">💱 Tasa del Día</span><span class="detail-value">Bs. ${AppLogic.formatMoney(d.tasa)}</span></div>`;
+                }
+
+                // Sección: Desglose de Cuentas
+                h += `<h4 style="margin:16px 0 8px;color:var(--accent)">💰 Cuentas</h4>`;
+                h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">`;
+
+                if (d.binance !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Binance</div><div style="font-weight:600;color:#F0B90B">$${AppLogic.formatMoney(d.binance)}</div></div>`;
+                if (d.bnc !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">BNC</div><div style="font-weight:600">$${AppLogic.formatMoney(d.bnc)}</div></div>`;
+                if (d.bancaribe !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Bancaribe</div><div style="font-weight:600">$${AppLogic.formatMoney(d.bancaribe)}</div></div>`;
+                if (d.fisico !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Efectivo</div><div style="font-weight:600;color:var(--accent)">$${AppLogic.formatMoney(d.fisico)}</div></div>`;
+                if (d.bolivares !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Bolívares</div><div style="font-weight:600">Bs. ${AppLogic.formatMoney(d.bolivares)}</div></div>`;
+
+                h += `</div>`;
+
+                // Sección: Deudores
+                if (d.deudores && d.deudores.length > 0) {
+                    h += `<h4 style="margin:16px 0 8px;color:var(--danger)">📋 Deudores (${d.deudores.length})</h4>`;
+                    h += `<div style="background:var(--bg-secondary);border-radius:10px;padding:10px">`;
+                    d.deudores.forEach(x => {
+                        h += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+                            <span>${x.nombre}</span>
+                            <span style="color:var(--danger);font-weight:600">$${AppLogic.formatMoney(x.monto)}</span>
+                        </div>`;
+                    });
+                    h += `</div>`;
+                    h += `<div class="detail-row" style="margin-top:8px"><span class="detail-label">Total en Deudas</span><span class="detail-value" style="color:var(--danger)">$${AppLogic.formatMoney(d.deudaTotal || 0)}</span></div>`;
+                }
+
+                // Sección: Movimientos del día
+                if (d.movimientos && d.movimientos.length > 0) {
+                    const movimientosHoy = d.movimientos.filter(m => m.f === k);
+                    if (movimientosHoy.length > 0) {
+                        h += `<h4 style="margin:16px 0 8px;color:var(--blue)">📝 Movimientos del Día</h4>`;
+                        movimientosHoy.forEach(m => {
+                            let icon = '⚪', color = '#fff';
+                            if (m.tipo === 'p') { icon = '🔴'; color = 'var(--danger)'; }
+                            if (m.tipo === 'a') { icon = '🟢'; color = 'var(--accent)'; }
+                            h += `<div style="background:var(--bg-secondary);padding:8px;margin-bottom:4px;border-radius:6px;font-size:0.85rem">
+                                <div style="display:flex;justify-content:space-between">
+                                    <span>${icon} ${m.desc}</span>
+                                    <strong style="color:${color}">$${AppLogic.formatMoney(m.monto)}</strong>
+                                </div>
+                                ${m.detalle ? `<div style="font-size:0.75rem;color:#888">${m.detalle}</div>` : ''}
+                            </div>`;
+                        });
+                    }
+                }
+
+                document.getElementById('day-modal-content').innerHTML = h;
                 UI.openModal('day-modal');
+            },
+            // Función para eliminar registro usando deleteDoc
+            async del(k) {
+                if (!confirm('¿Eliminar registro del ' + k + '?')) return;
+                await deleteDoc(doc(db, "usuarios", auth.currentUser.uid, "historial", k));
+                delete historialData[k];
+                UI.closeModal('day-modal');
+                this.render();
+                UI.toast('🗑️ Registro eliminado');
             }
         };
 
-        // Init
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // INICIALIZACIÓN
+        // ═══════════════════════════════════════════════════════════════════════════════
         UI.typewriter(document.getElementById('typewriter-title'), 'MI CARTERA PRO');
         UI.setTheme(localStorage.getItem('theme') || 'dark');
 
-        onAuthStateChanged(auth, async (user) => {
+        // 6. ESTABILIDAD - onAuthStateChanged correctamente configurado
+        onAuthStateChanged(auth, async (u) => {
             UI.hideLoading();
-            if (user) {
+            if (u) {
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
-                onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
-                    if (snap.exists()) { userData = snap.data(); AppData.render(); }
+                onSnapshot(doc(db, "usuarios", u.uid), s => {
+                    if (s.exists()) {
+                        userData = s.data();
+                        if (!userData.saldos) userData.saldos = {};
+                        if (!userData.eventos) userData.eventos = [];
+                        AppData.render();
+                    }
                 });
-                await Calendar.loadHistorial();
+                UI.initReactivity();
+                Calendar.load();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('app').style.display = 'none';
@@ -946,4 +1581,5 @@
         });
     </script>
 </body>
+
 </html>
