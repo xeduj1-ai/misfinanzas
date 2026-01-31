@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mi Cartera Pro - Final Cloud</title>
+    <title>Mi Cartera Pro - Restaurada v18</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -30,28 +30,25 @@
             .auth-container { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
             input, button, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
             
-            /* BOTONES VISIBLES */
-            .btn-save { background: var(--accent); color: white; font-weight: bold; font-size: 1.1em; border: 2px solid #1e8449; height: 60px; margin-top: 15px; }
-            .btn-history { background: var(--info); color: white; }
-            .btn-logout { background: var(--danger); font-size: 0.8em; }
-            
             .total-box { background: linear-gradient(135deg, var(--primary), #4ca1af); color: white; padding: 20px; border-radius: 15px; text-align: center; font-weight: bold; font-size: 1.4em; margin-bottom: 20px; }
-            .card { border: 1px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+            .card { border: 1px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 15px; position: relative; }
+            
+            /* ICONOS */
+            .input-group { position: relative; }
+            .img-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; object-fit: contain; z-index: 5; }
+            .input-group input { padding-left: 45px !important; }
+
+            /* DEUDORES */
+            .deudor-row { background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-radius: 12px; border-left: 5px solid var(--info); }
+            .btn-abono { background: var(--info); font-size: 0.8em; margin-top: 5px; width: 48%; display: inline-block; }
+            .btn-pago { background: var(--accent); font-size: 0.8em; margin-top: 5px; width: 48%; display: inline-block; }
+            
+            .btn-save { background: var(--accent); height: 50px; margin-top: 10px; }
             #modal-historial { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         `;
         document.head.appendChild(style);
 
         let userData = { saldos: { binance:0, bnc:0, bancaribe:0, fisico:0, bolivares:0, tasa:37 }, eventos: [] };
-
-        // --- AUTH ---
-        window.handleAuth = async (mode) => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            try {
-                if(mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
-                else await createUserWithEmailAndPassword(auth, email, pass);
-            } catch (e) { alert("Error: " + e.message); }
-        };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -70,7 +67,6 @@
             });
         }
 
-        // FUNCIÓN CLAVE: GUARDA TODO
         window.guardarTodo = async () => {
             userData.saldos = {
                 tasa: parseFloat(document.getElementById('tasa').value) || 1,
@@ -80,21 +76,36 @@
                 fisico: parseFloat(document.getElementById('fisico').value) || 0,
                 bolivares: parseFloat(document.getElementById('bolivares').value) || 0
             };
-            
             const uid = auth.currentUser.uid;
-            const hoy = new Date().toISOString().split('T')[0];
+            const hoy = new Date().toLocaleDateString();
+            await setDoc(doc(db, "usuarios", uid), userData);
+            await setDoc(doc(db, "usuarios", uid, "historial", hoy.replace(/\//g, "-")), {
+                fecha: hoy,
+                saldos: userData.saldos,
+                totalUsd: calcularTotal()
+            });
+            alert("✅ Guardado con éxito");
+        };
 
-            try {
-                // 1. Guardar estado actual
-                await setDoc(doc(db, "usuarios", uid), userData);
-                // 2. Guardar en historial
-                await setDoc(doc(db, "usuarios", uid, "historial", hoy), {
-                    fecha: hoy,
-                    saldos: userData.saldos,
-                    totalUsd: calcularTotal()
-                });
-                alert("✅ ¡Datos guardados en la nube y en el historial!");
-            } catch (e) { alert("Error al guardar: " + e.message); }
+        window.registrarOperacion = async () => {
+            const t = document.getElementById('tipo').value;
+            const m = parseFloat(document.getElementById('monto').value);
+            const d = document.getElementById('desc').value || "S/N";
+            if(!m) return;
+            if(t === 'prestamo') userData.saldos.fisico -= m; else userData.saldos.fisico += m;
+            userData.eventos.push({ fecha: new Date().toLocaleDateString(), tipo: t, monto: m, desc: d, cobrado: false });
+            await guardarTodo();
+            document.getElementById('monto').value = ""; document.getElementById('desc').value = "";
+        };
+
+        window.abonar = async (i) => {
+            const val = parseFloat(prompt(`¿Cuánto abona ${userData.eventos[i].desc}?`));
+            if(val > 0 && val <= userData.eventos[i].monto) {
+                userData.saldos.fisico += val;
+                userData.eventos[i].monto -= val;
+                if(userData.eventos[i].monto <= 0) userData.eventos[i].cobrado = true;
+                await guardarTodo();
+            }
         };
 
         function calcularTotal() {
@@ -103,21 +114,6 @@
             return userData.saldos.binance + userData.saldos.bnc + userData.saldos.bancaribe + userData.saldos.fisico + sumaD + (userData.saldos.bolivares / userData.saldos.tasa);
         }
 
-        window.abrirHistorial = async () => {
-            const snap = await getDocs(query(collection(db, "usuarios", auth.currentUser.uid, "historial")));
-            let html = "<h2>📅 Historial de Días</h2><button onclick='cerrarH()'>Volver</button><hr>";
-            snap.forEach(d => {
-                const data = d.data();
-                html += `<div style='background:#f9f9f9; padding:10px; margin:10px 0; border-radius:10px;'>
-                    <b>Día: ${data.fecha}</b><br>💰 Patrimonio: $${data.totalUsd.toFixed(2)}
-                </div>`;
-            });
-            document.getElementById('modal-historial').innerHTML = html;
-            document.getElementById('modal-historial').style.display = 'block';
-        };
-
-        window.cerrarH = () => document.getElementById('modal-historial').style.display = 'none';
-
         function renderAll() {
             document.getElementById('tasa').value = userData.saldos.tasa;
             document.getElementById('binance').value = userData.saldos.binance;
@@ -125,8 +121,38 @@
             document.getElementById('bancaribe').value = userData.saldos.bancaribe;
             document.getElementById('fisico').value = userData.saldos.fisico;
             document.getElementById('bolivares').value = userData.saldos.bolivares;
+
+            let htmlD = "";
+            userData.eventos.forEach((e, i) => {
+                if(e.tipo === 'prestamo' && !e.cobrado) {
+                    htmlD += `
+                    <div class="deudor-row">
+                        <b>${e.desc}</b> | <span style="color:var(--danger)">$${e.monto.toFixed(2)}</span><br>
+                        <button class="btn-abono" onclick="abonar(${i})">Abonar</button>
+                        <button class="btn-pago" onclick="abonar(${i})">Pagó Todo</button>
+                    </div>`;
+                }
+            });
+            document.getElementById('lista').innerHTML = htmlD || "Sin deudas.";
             document.getElementById('patrimonio').innerHTML = `PATRIMONIO: $${calcularTotal().toLocaleString()}`;
         }
+
+        window.abrirH = async () => {
+            const snap = await getDocs(collection(db, "usuarios", auth.currentUser.uid, "historial"));
+            let h = "<h2>Historial</h2><button onclick='document.getElementById(\"modal-historial\").style.display=\"none\"'>Cerrar</button><hr>";
+            snap.forEach(doc => h += `<p>${doc.data().fecha}: $${doc.data().totalUsd.toFixed(2)}</p>`);
+            document.getElementById('modal-historial').innerHTML = h;
+            document.getElementById('modal-historial').style.display = 'block';
+        };
+
+        window.authAction = async (m) => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('pass').value;
+            try {
+                if(m === 'l') await signInWithEmailAndPassword(auth, e, p);
+                else await createUserWithEmailAndPassword(auth, e, p);
+            } catch (err) { alert(err.message); }
+        };
     </script>
 </head>
 <body>
@@ -135,28 +161,39 @@
     <h2>MI CARTERA</h2>
     <input type="email" id="email" placeholder="Correo">
     <input type="password" id="pass" placeholder="Clave">
-    <button onclick="handleAuth('login')">ENTRAR</button>
-    <button onclick="handleAuth('register')" style="background:#34495e">CREAR CUENTA</button>
+    <button onclick="authAction('l')">ENTRAR</button>
+    <button onclick="authAction('r')" style="background:#34495e">CREAR CUENTA</button>
 </div>
 
 <div id="app-screen" class="container">
-    <button class="btn-history" onclick="abrirHistorial()">📅 VER HISTORIAL DE DÍAS</button>
-    
+    <button style="background:var(--info)" onclick="abrirH()">📅 VER HISTORIAL</button>
     <div class="total-box" id="patrimonio">...</div>
 
     <div class="card">
         <h3>💰 Mis Cuentas</h3>
-        <input type="number" id="tasa" step="0.01" placeholder="Tasa BCV">
-        <input type="number" id="binance" placeholder="Binance $">
-        <input type="number" id="bnc" placeholder="BNC $">
-        <input type="number" id="bancaribe" placeholder="Bancaribe $">
-        <input type="number" id="fisico" placeholder="Efectivo $">
-        <input type="number" id="bolivares" placeholder="Monto en Bs.">
-        
-        <button class="btn-save" onclick="guardarTodo()">💾 GUARDAR TODO Y RESPALDAR DÍA</button>
+        <div class="input-group"><img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="tasa" step="0.01" placeholder="Tasa BCV"></div>
+        <div class="input-group"><img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="binance" placeholder="Binance $"></div>
+        <div class="input-group"><img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bnc" placeholder="BNC $"></div>
+        <div class="input-group"><img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bancaribe" placeholder="Bancaribe $"></div>
+        <div class="input-group"><img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="fisico" placeholder="Efectivo $"></div>
+        <div class="input-group"><img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bolivares" placeholder="Monto en Bs."></div>
+        <button class="btn-save" onclick="guardarTodo()">💾 GUARDAR Y RESPALDAR DÍA</button>
     </div>
 
-    <button class="btn-logout" onclick="signOut(auth)">Cerrar Sesión</button>
+    <div class="card">
+        <h3>✍️ Nueva Operación</h3>
+        <select id="tipo"><option value="prestamo">Prestar (Sale Efectivo)</option><option value="compra">Entra $ (Sube Efectivo)</option></select>
+        <input type="text" id="desc" placeholder="Nombre / Concepto">
+        <input type="number" id="monto" placeholder="Monto $">
+        <button onclick="registrarOperacion()">REGISTRAR OPERACIÓN</button>
+    </div>
+
+    <div class="card">
+        <h3>👥 Deudores Actuales</h3>
+        <div id="lista"></div>
+    </div>
+
+    <button style="background:var(--danger)" onclick="signOut(auth)">Cerrar Sesión</button>
 </div>
 
 <div id="modal-historial"></div>
