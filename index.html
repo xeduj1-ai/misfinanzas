@@ -3,253 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#2c3e50">
-    <link rel="apple-touch-icon" href="iconos/app-icon.png">
-    
-    <title>Cartera Pro v12 - Custom Icons</title>
-    <style>
-        :root { --primary: #2c3e50; --accent: #27ae60; --bnc: #0056b3; --bancaribe: #f39c12; --danger: #e74c3c; --info: #3498db; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        
-        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary); color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000; transition: 0.8s; }
-        
-        .total-box { font-size: 1.5em; font-weight: bold; text-align: center; background: linear-gradient(135deg, var(--primary), #4ca1af); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        
-        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 768px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    <title>Mi Cartera Pro - Cloud</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        .card { background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; }
-        .card h3 { margin: 0 0 10px 0; font-size: 1.1em; border-bottom: 2px solid var(--accent); padding-bottom: 5px; }
-        
-        /* ESTILO PARA TUS ICONOS PROPIOS */
-        .input-group { position: relative; margin-bottom: 10px; }
-        .img-icon { 
-            position: absolute; 
-            left: 10px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            width: 24px; 
-            height: 24px; 
-            object-fit: contain; 
-            pointer-events: none;
-        }
-        .input-group input { padding-left: 45px !important; margin: 0; }
-        
-        input, select, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        button { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        
-        .status-bcv { font-size: 0.8em; padding: 8px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid transparent; }
-        .deudor-row { background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--info); }
-        
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
-        .day { padding: 10px 0; background: #fff; border-radius: 8px; text-align: center; border: 1px solid #eee; font-size: 0.8em; }
-        .day.has-data { background: #d4edda; font-weight: bold; }
-        .day.today { background: var(--primary); color: white; }
-    </style>
-</head>
-<body>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-FSYVbeYlIIJYBD9QrcMqxsgBZGLr3ek",
+            authDomain: "mi-cartera-3ce50.firebaseapp.com",
+            projectId: "mi-cartera-3ce50",
+            storageBucket: "mi-cartera-3ce50.firebasestorage.app",
+            messagingSenderId: "338633818752",
+            appId: "1:338633818752:web:2487ebfe811e36f9471c65"
+        };
 
-<div id="login-screen">
-    <h1 style="letter-spacing: 2px;">MI CARTERA</h1>
-    <p id="bcv-loader">🤖 Robot buscando tasa oficial...</p>
-</div>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-<div class="container" id="app" style="display:none;">
-    <div class="total-box" id="globalTotal">PATRIMONIO: $0.00</div>
-    
-    <div id="bcv-msg" class="status-bcv">Conectando...</div>
+        // --- ESTILOS ---
+        const style = document.createElement('style');
+        style.innerHTML = `
+            :root { --primary: #2c3e50; --accent: #27ae60; --danger: #e74c3c; }
+            body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
+            .auth-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+            .container { max-width: 1000px; margin: auto; background: white; padding: 15px; border-radius: 20px; display: none; }
+            input, button, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+            button { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; }
+            .btn-alt { background: var(--primary); font-size: 0.8em; }
+            .total-box { background: linear-gradient(135deg, var(--primary), #4ca1af); color: white; padding: 20px; border-radius: 15px; text-align: center; font-weight: bold; font-size: 1.4em; margin-bottom: 20px; }
+            .card { border: 1px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+            .input-group { position: relative; }
+            .img-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; }
+            .input-group input { padding-left: 45px !important; }
+            .deudor-row { background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #3498db; }
+        `;
+        document.head.appendChild(style);
 
-    <div class="grid">
-        <div class="card">
-            <h3>💰 Mis Cuentas</h3>
-            
-            <label style="font-size: 0.7em;">TASA BCV</label>
-            <div class="input-group">
-                <img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="tasa" step="0.0001" oninput="actualizar()" style="border: 2px solid var(--bancaribe); font-weight: bold;">
-            </div>
+        // --- LÓGICA DE USUARIO ---
+        window.handleAuth = async (mode) => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if(!email || !pass) return alert("Llena los campos");
+            try {
+                if(mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+            } catch (e) { alert("Error: " + e.message); }
+        };
 
-            <div class="input-group">
-                <img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="binance" placeholder="Binance $" oninput="actualizar()">
-            </div>
+        window.logout = () => signOut(auth);
 
-            <div class="input-group">
-                <img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="bnc" placeholder="BNC $" oninput="actualizar()">
-            </div>
-
-            <div class="input-group">
-                <img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="bancaribe" placeholder="Bancaribe $" oninput="actualizar()">
-            </div>
-
-            <div class="input-group">
-                <img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="fisico" placeholder="Efectivo $" oninput="actualizar()">
-            </div>
-
-            <div class="input-group">
-                <img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'">
-                <input type="number" id="bolivares" placeholder="Saldo Bs." oninput="actualizar()">
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>✍️ Operación</h3>
-            <select id="tipoMovimiento">
-                <option value="prestamo">Prestar (Sale Efectivo)</option>
-                <option value="compra">Compra $ (Entra Efectivo)</option>
-            </select>
-            <input type="text" id="descripcionMov" placeholder="Nombre / Concepto">
-            <input type="number" id="montoMov" placeholder="Monto en $">
-            <button onclick="registrarEvento()">Guardar Registro</button>
-            <hr>
-            <button onclick="robotBCV()" style="background:var(--primary); font-size: 0.8em;">🔄 Forzar Robot BCV</button>
-        </div>
-
-        <div class="card">
-            <h3>👥 Por Cobrar</h3>
-            <div id="listaDeudores" style="max-height: 200px; overflow-y: auto;"></div>
-            <hr>
-            <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                <span>Deuda Total:</span>
-                <span id="totalDeudas" style="color:var(--danger)">$0.00</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="card" style="margin-top: 15px;">
-        <h3 style="text-align: center;">📅 Calendario de Movimientos</h3>
-        <div class="calendar" id="calendarioGrid"></div>
-    </div>
-</div>
-
-<script>
-    let db = JSON.parse(localStorage.getItem('cartera_v12')) || {
-        saldos: { binance:0, bnc:0, bancaribe:0, fisico:0, bolivares:0, tasa:37.02 },
-        eventos: []
-    };
-
-    async function robotBCV() {
-        const msg = document.getElementById('bcv-msg');
-        try {
-            const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.bcv.org.ve/'));
-            const data = await res.json();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.contents, "text/html");
-            const dolarCont = doc.querySelector('#dolar strong');
-            if (dolarCont) {
-                const tasaNum = parseFloat(dolarCont.innerText.replace(',', '.').trim());
-                document.getElementById('tasa').value = tasaNum;
-                db.saldos.tasa = tasaNum;
-                msg.innerHTML = "✅ Tasa BCV: " + tasaNum;
-                msg.style.borderColor = "var(--accent)";
-                msg.style.color = "var(--accent)";
-            } else { throw new Error(); }
-        } catch (e) {
-            msg.innerHTML = "⚠️ Robot offline. Usando tasa manual.";
-            msg.style.borderColor = "var(--danger)";
-            msg.style.color = "var(--danger)";
-            document.getElementById('tasa').value = db.saldos.tasa;
-        }
-    }
-
-    setTimeout(async () => {
-        await robotBCV();
-        document.getElementById('login-screen').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            cargarDatos();
-            actualizar();
-        }, 800);
-    }, 1500);
-
-    function cargarDatos() {
-        document.getElementById('binance').value = db.saldos.binance;
-        document.getElementById('bnc').value = db.saldos.bnc;
-        document.getElementById('bancaribe').value = db.saldos.bancaribe;
-        document.getElementById('fisico').value = db.saldos.fisico;
-        document.getElementById('bolivares').value = db.saldos.bolivares;
-    }
-
-    function actualizar() {
-        db.saldos.tasa = parseFloat(document.getElementById('tasa').value) || 1;
-        db.saldos.binance = parseFloat(document.getElementById('binance').value) || 0;
-        db.saldos.bnc = parseFloat(document.getElementById('bnc').value) || 0;
-        db.saldos.bancaribe = parseFloat(document.getElementById('bancaribe').value) || 0;
-        db.saldos.fisico = parseFloat(document.getElementById('fisico').value) || 0;
-        db.saldos.bolivares = parseFloat(document.getElementById('bolivares').value) || 0;
-
-        let sumaD = 0;
-        let htmlD = "";
-        db.eventos.forEach((e, i) => {
-            if(e.tipo === 'prestamo' && !e.cobrado) {
-                sumaD += e.monto;
-                htmlD += `<div class="deudor-row">
-                    <div><b>${e.desc}</b><br><small>${e.fecha}</small></div>
-                    <div style="display:flex; align-items:center; gap:8px">
-                        <span style="color:var(--danger)">$${e.monto}</span>
-                        <button style="width:auto; padding:5px" onclick="marcarCobrado(${i})">✔</button>
-                    </div>
-                </div>`;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                syncData(user.uid);
+            } else {
+                document.getElementById('auth-screen').style.display = 'block';
+                document.getElementById('app-screen').style.display = 'none';
             }
         });
 
-        document.getElementById('listaDeudores').innerHTML = htmlD || "<p style='color:gray; text-align:center'>Limpio.</p>";
-        document.getElementById('totalDeudas').innerText = `$${sumaD.toFixed(2)}`;
+        // --- LÓGICA DE DATOS ---
+        let userData = { saldos: { binance:0, bnc:0, bancaribe:0, fisico:0, bolivares:0, tasa:37 }, eventos: [] };
 
-        const totalUsd = db.saldos.binance + db.saldos.bnc + db.saldos.bancaribe + db.saldos.fisico + sumaD + (db.saldos.bolivares / db.saldos.tasa);
-        document.getElementById('globalTotal').innerHTML = `PATRIMONIO: $${totalUsd.toLocaleString('en-US', {minimumFractionDigits:2})} <br> <span style="font-size:0.6em">Bs. ${(totalUsd * db.saldos.tasa).toLocaleString('es-VE')}</span>`;
-        
-        localStorage.setItem('cartera_v12', JSON.stringify(db));
-        renderCalendario();
-    }
-
-    function registrarEvento() {
-        const t = document.getElementById('tipoMovimiento').value;
-        const m = parseFloat(document.getElementById('montoMov').value);
-        const d = document.getElementById('descripcionMov').value || "S/N";
-        const hoy = new Date();
-        const f = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
-
-        if(!m) return;
-        if(t === 'prestamo') db.saldos.fisico -= m;
-        else db.saldos.fisico += m;
-
-        db.eventos.push({ fecha: f, tipo: t, monto: m, desc: d, cobrado: false });
-        document.getElementById('montoMov').value = "";
-        document.getElementById('descripcionMov').value = "";
-        document.getElementById('fisico').value = db.saldos.fisico;
-        actualizar();
-    }
-
-    function marcarCobrado(i) {
-        db.saldos.fisico += db.eventos[i].monto;
-        db.eventos[i].cobrado = true;
-        document.getElementById('fisico').value = db.saldos.fisico;
-        actualizar();
-    }
-
-    function renderCalendario() {
-        const grid = document.getElementById('calendarioGrid');
-        grid.innerHTML = "";
-        ['D','L','M','M','J','V','S'].forEach(d => grid.innerHTML += `<div style="font-weight:bold; text-align:center; font-size:0.7em;">${d}</div>`);
-        const hoy = new Date();
-        const pD = new Date(hoy.getFullYear(), hoy.getMonth(), 1).getDay();
-        const dM = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
-        for(let i=0; i<pD; i++) grid.innerHTML += `<div></div>`;
-        for(let d=1; d<=dM; d++) {
-            const f = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-            const tiene = db.eventos.some(e => e.fecha === f);
-            grid.innerHTML += `<div class="day ${d === hoy.getDate()?'today':''} ${tiene?'has-data':''}">${d}</div>`;
+        async function syncData(uid) {
+            const docRef = doc(db, "usuarios", uid);
+            // Escuchar cambios en tiempo real
+            onSnapshot(docRef, (snap) => {
+                if(snap.exists()) {
+                    userData = snap.data();
+                    renderAll();
+                }
+            });
         }
-    }
-</script>
+
+        window.actualizar = async () => {
+            userData.saldos = {
+                tasa: parseFloat(document.getElementById('tasa').value) || 1,
+                binance: parseFloat(document.getElementById('binance').value) || 0,
+                bnc: parseFloat(document.getElementById('bnc').value) || 0,
+                bancaribe: parseFloat(document.getElementById('bancaribe').value) || 0,
+                fisico: parseFloat(document.getElementById('fisico').value) || 0,
+                bolivares: parseFloat(document.getElementById('bolivares').value) || 0
+            };
+            await setDoc(doc(db, "usuarios", auth.currentUser.uid), userData);
+        };
+
+        window.registrar = async () => {
+            const t = document.getElementById('tipo').value;
+            const m = parseFloat(document.getElementById('monto').value);
+            const d = document.getElementById('desc').value || "S/N";
+            if(!m) return;
+            const f = new Date().toISOString().split('T')[0];
+            if(t === 'prestamo') userData.saldos.fisico -= m; else userData.saldos.fisico += m;
+            userData.eventos.push({ fecha: f, tipo: t, monto: m, desc: d, cobrado: false });
+            document.getElementById('monto').value = ""; document.getElementById('desc').value = "";
+            await actualizar();
+        };
+
+        window.cobrar = async (i) => {
+            userData.saldos.fisico += userData.eventos[i].monto;
+            userData.eventos[i].cobrado = true;
+            await actualizar();
+        };
+
+        function renderAll() {
+            // Cargar inputs
+            document.getElementById('tasa').value = userData.saldos.tasa;
+            document.getElementById('binance').value = userData.saldos.binance;
+            document.getElementById('bnc').value = userData.saldos.bnc;
+            document.getElementById('bancaribe').value = userData.saldos.bancaribe;
+            document.getElementById('fisico').value = userData.saldos.fisico;
+            document.getElementById('bolivares').value = userData.saldos.bolivares;
+
+            let sumaD = 0; let htmlD = "";
+            userData.eventos.forEach((e, i) => {
+                if(e.tipo === 'prestamo' && !e.cobrado) {
+                    sumaD += e.monto;
+                    htmlD += `<div class="deudor-row">
+                        <div><b>${e.desc}</b><br><small>${e.fecha}</small></div>
+                        <button style="width:auto" onclick="cobrar(${i})">✔ $${e.monto}</button>
+                    </div>`;
+                }
+            });
+            document.getElementById('lista').innerHTML = htmlD || "<p style='color:gray'>Sin deudas.</p>";
+            
+            const totalUsd = userData.saldos.binance + userData.saldos.bnc + userData.saldos.bancaribe + userData.saldos.fisico + sumaD + (userData.saldos.bolivares / userData.saldos.tasa);
+            document.getElementById('patrimonio').innerHTML = `PATRIMONIO: $${totalUsd.toLocaleString('en-US', {minimumFractionDigits:2})} <br> <span style="font-size:0.6em">Bs. ${(totalUsd * userData.saldos.tasa).toLocaleString('es-VE')}</span>`;
+        }
+    </script>
+</head>
+<body>
+
+<div id="auth-screen" class="auth-container">
+    <h2 style="color:var(--primary)">BIENVENIDO</h2>
+    <p style="font-size:0.8em; color:gray">Ingresa para ver tu cartera en la nube</p>
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="pass" placeholder="Tu clave privada">
+    <button onclick="handleAuth('login')">ENTRAR LENTAMENTE</button>
+    <button class="btn-alt" onclick="handleAuth('register')">CREAR CUENTA NUEVA</button>
+</div>
+
+<div id="app-screen" class="container">
+    <div class="total-box" id="patrimonio">CARGANDO...</div>
+    
+    <div class="card">
+        <h3>💰 Mis Cuentas (Cloud)</h3>
+        <label style="font-size:0.7em">TASA BCV</label>
+        <div class="input-group"><img src="iconos/bcv.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="tasa" step="0.0001" oninput="actualizar()"></div>
+        <div class="input-group"><img src="iconos/binance.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="binance" placeholder="Binance" oninput="actualizar()"></div>
+        <div class="input-group"><img src="iconos/bnc.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bnc" placeholder="BNC" oninput="actualizar()"></div>
+        <div class="input-group"><img src="iconos/bancaribe.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bancaribe" placeholder="Bancaribe" oninput="actualizar()"></div>
+        <div class="input-group"><img src="iconos/efectivo.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="fisico" placeholder="Efectivo" oninput="actualizar()"></div>
+        <div class="input-group"><img src="iconos/bolivares.png" class="img-icon" onerror="this.style.display='none'"><input type="number" id="bolivares" placeholder="Bolívares" oninput="actualizar()"></div>
+    </div>
+
+    <div class="card">
+        <h3>✍️ Nueva Operación</h3>
+        <select id="tipo">
+            <option value="prestamo">Prestar (Sale Efectivo)</option>
+            <option value="compra">Compra $ (Entra Efectivo)</option>
+        </select>
+        <input type="text" id="desc" placeholder="Nombre / Concepto">
+        <input type="number" id="monto" placeholder="Monto $">
+        <button onclick="registrar()">GUARDAR EN LA NUBE</button>
+    </div>
+
+    <div class="card">
+        <h3>👥 Cuentas por Cobrar</h3>
+        <div id="lista"></div>
+    </div>
+
+    <button class="btn-alt" style="background:var(--danger)" onclick="logout()">CERRAR SESIÓN</button>
+</div>
+
 </body>
 </html>
