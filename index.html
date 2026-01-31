@@ -806,6 +806,54 @@
             color: white;
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
         }
+
+        /* BDV Clickable Input */
+        .bdv-clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bdv-clickable:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .bdv-clickable input {
+            cursor: pointer !important;
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(16, 185, 129, 0.1)) !important;
+        }
+
+        /* Sub-cuenta item */
+        .subcuenta-item {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--accent);
+        }
+
+        .subcuenta-item .subcuenta-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .subcuenta-item .subcuenta-monto {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .subcuenta-item .btn-delete-sub {
+            background: var(--danger);
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 
@@ -869,6 +917,19 @@
                 <div class="input-group">
                     <img src="iconos/bolivares.png" onerror="this.style.display='none'">
                     <input type="number" id="bolivares" placeholder="Bolívares Bs.">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/zelle.png" onerror="this.style.display='none'">
+                    <input type="number" id="zelle" placeholder="Zelle $">
+                </div>
+                <div class="input-group">
+                    <img src="iconos/paypal.png" onerror="this.style.display='none'">
+                    <input type="number" id="paypal" placeholder="PayPal $">
+                </div>
+                <div class="input-group bdv-clickable" onclick="AppData.openBdvModal()">
+                    <img src="iconos/bdv.png" onerror="this.style.display='none'">
+                    <input type="number" id="bdv" placeholder="BDV $ (Click para sub-cuentas)" readonly
+                        style="cursor:pointer">
                 </div>
                 <button class="btn-save" id="btn-guardar" onclick="AppData.save()">💾 GUARDAR Y RESPALDAR</button>
             </div>
@@ -1039,6 +1100,39 @@
         </div>
     </div>
 
+    <!-- Modal: Sub-cuentas BDV -->
+    <div class="modal-overlay" id="modal-bdv-detalles">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">🏦 Sub-cuentas BDV</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-bdv-detalles')">×</button>
+            </div>
+
+            <!-- Lista de sub-cuentas -->
+            <div id="bdv-subcuentas-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px"></div>
+
+            <!-- Total de sub-cuentas -->
+            <div style="background:var(--bg-secondary);padding:12px;border-radius:10px;margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="color:var(--text-secondary)">Total BDV:</span>
+                    <span id="bdv-total-display"
+                        style="font-size:1.4rem;font-weight:700;color:var(--accent)">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar sub-cuenta -->
+            <div style="background:rgba(255,255,255,0.05);padding:16px;border-radius:12px">
+                <label class="input-label">Nombre de la sub-cuenta</label>
+                <input type="text" id="bdv-sub-nombre" class="input-field" placeholder="Ej: Ahorros, Corriente..."
+                    style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)">
+                <label class="input-label" style="margin-top:8px">Monto en USD ($)</label>
+                <input type="number" id="bdv-sub-monto" class="input-field" placeholder="0.00" step="0.01"
+                    style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary)">
+                <button class="btn-save" onclick="AppData.addBdvSubcuenta()">➕ AGREGAR SUB-CUENTA</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script type="module">
@@ -1069,7 +1163,11 @@
         // ESTADO GLOBAL
         // ═══════════════════════════════════════════════════════════════════════════════
         let userData = {
-            saldos: { tasa: 0, binance: 0, bnc: 0, bancaribe: 0, fisico: 0, bolivares: 0 },
+            saldos: {
+                tasa: 0, binance: 0, bnc: 0, bancaribe: 0, fisico: 0, bolivares: 0,
+                zelle: 0, paypal: 0, bdv: 0,
+                bdvSubcuentas: [] // Array de {nombre: string, monto: number}
+            },
             eventos: []
         };
         let historialData = {};
@@ -1110,7 +1208,7 @@
             },
             // 1. REACTIVIDAD EN TIEMPO REAL - Event listeners para actualización instantánea
             initReactivity() {
-                const fields = ['tasa', 'binance', 'bnc', 'bancaribe', 'fisico', 'bolivares'];
+                const fields = ['tasa', 'binance', 'bnc', 'bancaribe', 'fisico', 'bolivares', 'zelle', 'paypal'];
                 fields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
@@ -1135,8 +1233,19 @@
                     userData.eventos.forEach(e => { if (e.tipo === 'p' && !e.c) debtTotal += (e.monto || 0); });
                 }
                 const tasa = s.tasa || 1;
-                const total = (s.binance || 0) + (s.bnc || 0) + (s.bancaribe || 0) + (s.fisico || 0) + debtTotal + ((s.bolivares || 0) / tasa);
-                return { total, debtTotal, tasa };
+
+                // Calcular total BDV desde sub-cuentas
+                let bdvTotal = 0;
+                if (s.bdvSubcuentas && s.bdvSubcuentas.length > 0) {
+                    bdvTotal = s.bdvSubcuentas.reduce((sum, sub) => sum + (sub.monto || 0), 0);
+                }
+
+                // Todas las cuentas en USD + bolívares convertidos
+                const total = (s.binance || 0) + (s.bnc || 0) + (s.bancaribe || 0) +
+                    (s.fisico || 0) + (s.zelle || 0) + (s.paypal || 0) +
+                    bdvTotal + debtTotal + ((s.bolivares || 0) / tasa);
+
+                return { total, debtTotal, tasa, bdvTotal };
             },
             formatMoney(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
             daysSince(dateStr) {
@@ -1239,6 +1348,12 @@
                 if (active !== 'bancaribe') document.getElementById('bancaribe').value = s.bancaribe || '';
                 if (active !== 'fisico') document.getElementById('fisico').value = s.fisico || '';
                 if (active !== 'bolivares') document.getElementById('bolivares').value = s.bolivares || '';
+                if (active !== 'zelle') document.getElementById('zelle').value = s.zelle || '';
+                if (active !== 'paypal') document.getElementById('paypal').value = s.paypal || '';
+
+                // BDV se calcula desde sub-cuentas
+                const bdvTotal = (s.bdvSubcuentas || []).reduce((sum, sub) => sum + (sub.monto || 0), 0);
+                document.getElementById('bdv').value = bdvTotal || '';
 
                 this.renderTotalsOnly();
                 this.renderDebts();
@@ -1282,7 +1397,11 @@
                     bnc: parseFloat(document.getElementById('bnc').value) || 0,
                     bancaribe: parseFloat(document.getElementById('bancaribe').value) || 0,
                     fisico: parseFloat(document.getElementById('fisico').value) || 0,
-                    bolivares: parseFloat(document.getElementById('bolivares').value) || 0
+                    bolivares: parseFloat(document.getElementById('bolivares').value) || 0,
+                    zelle: parseFloat(document.getElementById('zelle').value) || 0,
+                    paypal: parseFloat(document.getElementById('paypal').value) || 0,
+                    bdv: (userData.saldos.bdvSubcuentas || []).reduce((sum, sub) => sum + (sub.monto || 0), 0),
+                    bdvSubcuentas: userData.saldos.bdvSubcuentas || []
                 };
 
                 if (!AppLogic.validate()) return;
@@ -1323,13 +1442,7 @@
                 const history = userData.eventos.filter(ev => ev.desc === e.desc).reverse();
                 let html = '';
                 history.forEach(h => {
-                    let icon = '⚪', color = '#fff', sign = '';
-                    if (h.tipo === 'p') { icon = '🔴'; color = 'var(--danger)'; sign = '+ Deuda'; }
-                    if (h.tipo === 'a') { icon = '🟢'; color = 'var(--accent)'; sign = '- Abono'; }
-                    html += `<div style="background:var(--bg-secondary);padding:8px;margin-bottom:6px;border-radius:6px;font-size:0.85rem">
-                        <div style="display:flex;justify-content:space-between"><span>${icon} ${sign}</span><strong style="color:${color}">$${AppLogic.formatMoney(h.monto)}</strong></div>
-                        <div style="font-size:0.75rem;color:#888">${h.f} ${h.detalle || ''}</div>
-                     </div>`;
+                    html += this.crearHTMLTarjeta(h, h.f);
                 });
                 document.getElementById('deudor-historial-list').innerHTML = html;
                 UI.openModal('deudor-modal');
@@ -1373,7 +1486,7 @@
                 setTimeout(() => document.getElementById('payment-amount').focus(), 100);
             },
 
-            // 3. CONVERSIÓN INVERSA - Si paga en Bs, el input es en Bs y se divide por tasa
+            // 3. PAGO MÓVIL CORREGIDO - El usuario ingresa USD, se multiplica por tasa para Bs
             async processPayment(method) {
                 if (currentDeudorIndex === null) return;
                 const e = userData.eventos[currentDeudorIndex];
@@ -1383,25 +1496,26 @@
                 const tasa = userData.saldos.tasa || 1;
                 let montoUSD, montoReal, detalle = '';
 
+                // Estandarización de método y cálculos
                 if (method === 'BS') {
-                    // CONVERSIÓN INVERSA: el usuario ingresa BOLÍVARES
-                    // montoUSD = bolívares / tasa
-                    montoUSD = val / tasa;
-                    montoReal = val;
-                    userData.saldos.bolivares += val;
-                    detalle = `Pago Móvil: Bs. ${AppLogic.formatMoney(val)} (= $${AppLogic.formatMoney(montoUSD)} @ Tasa ${tasa})`;
+                    montoUSD = val;
+                    const montoBs = val * tasa;
+                    montoReal = montoBs;
+                    userData.saldos.bolivares += montoBs;
+                    // Detalle se generará dinámicamente en el render, pero guardamos referencia
+                    detalle = `Pago: Bs. ${AppLogic.formatMoney(montoBs)} (Equivalente a $${AppLogic.formatMoney(val)})`;
                     document.getElementById('bolivares').value = userData.saldos.bolivares;
                 } else if (method === 'EFECTIVO') {
                     montoUSD = val;
                     montoReal = val;
                     userData.saldos.fisico += val;
-                    detalle = 'Efectivo USD';
+                    detalle = 'Pago: Efectivo (Físico)';
                     document.getElementById('fisico').value = userData.saldos.fisico;
                 } else if (method === 'BINANCE') {
                     montoUSD = val;
                     montoReal = val;
                     userData.saldos.binance += val;
-                    detalle = 'Binance USDT';
+                    detalle = 'Pago: Binance (USDT)';
                     document.getElementById('binance').value = userData.saldos.binance;
                 }
 
@@ -1409,14 +1523,26 @@
                 let cerrado = false;
                 if (e.monto <= 0.01) { e.monto = 0; e.c = true; cerrado = true; }
 
+                // GUARDADO ESTRUCTURADO UNIFICADO
+                // Campos obligatorios: nombre, monto, tasa, metodo, tipo, fecha
+                const fechaHoy = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
                 userData.eventos.push({
-                    tipo: 'a', monto: montoUSD, montoOriginal: montoReal, moneda: method,
-                    desc: e.desc, detalle, tasaUsada: tasa,
-                    f: new Date().toLocaleDateString('es-ES').replace(/\//g, '-')
+                    tipo: 'a', // Mantenemos 'a' para compatibilidad interna
+                    tipoTexto: 'abono', // Campo explícito pedido
+                    nombre: e.desc, // Nombre del deudor
+                    desc: e.desc, // Mantenemos desc por compatibilidad con filtro existente
+                    monto: montoUSD,
+                    montoOriginal: montoReal,
+                    tasa: tasa,
+                    metodo: method,
+                    moneda: method, // Compatibilidad
+                    fecha: fechaHoy,
+                    f: fechaHoy, // Compatibilidad
+                    detalle: detalle // Texto completo pre-generado por si acaso
                 });
 
                 UI.closeModal('payment-modal');
-                const msgMonto = method === 'BS' ? `Bs. ${AppLogic.formatMoney(montoReal)} (≈ $${AppLogic.formatMoney(montoUSD)})` : `$${AppLogic.formatMoney(montoReal)}`;
+                const msgMonto = method === 'BS' ? `$${AppLogic.formatMoney(montoUSD)} → Bs. ${AppLogic.formatMoney(montoReal)}` : `$${AppLogic.formatMoney(montoReal)}`;
                 UI.toast(cerrado ? `🎉 ¡Deuda saldada! ${msgMonto}` : `✅ Abono: ${msgMonto}`);
                 await this.save();
                 this.render();
@@ -1431,13 +1557,113 @@
                 let f = dateVal ? dateVal.split('-').reverse().join('-') : new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
 
                 userData.saldos.fisico -= monto;
-                userData.eventos.push({ tipo: 'p', monto, desc: user, c: false, f });
+                // Agregamos detalle por defecto para préstamos
+                userData.eventos.push({
+                    tipo: 'p', monto, desc: user, c: false, f,
+                    detalle: 'Préstamo'
+                });
 
                 UI.closeModal('loan-modal');
                 document.getElementById('loan-name').value = '';
                 document.getElementById('loan-amount').value = '';
                 await this.save();
                 this.render();
+            },
+
+            // GESTIÓN DE SUB-CUENTAS BDV
+            openBdvModal() {
+                this.renderBdvSubcuentas();
+                UI.openModal('modal-bdv-detalles');
+            },
+
+            renderBdvSubcuentas() {
+                const subs = userData.saldos.bdvSubcuentas || [];
+                let html = '';
+                let total = 0;
+
+                subs.forEach((sub, i) => {
+                    total += sub.monto || 0;
+                    html += `<div class="subcuenta-item">
+                        <div class="subcuenta-info">
+                            <h4>${sub.nombre}</h4>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span class="subcuenta-monto">$${AppLogic.formatMoney(sub.monto)}</span>
+                            <button class="btn-delete-sub" onclick="AppData.deleteBdvSubcuenta(${i})">🗑️</button>
+                        </div>
+                    </div>`;
+                });
+
+                document.getElementById('bdv-subcuentas-list').innerHTML = html || '<p style="text-align:center;color:var(--text-secondary)">Sin sub-cuentas</p>';
+                document.getElementById('bdv-total-display').textContent = '$' + AppLogic.formatMoney(total);
+                document.getElementById('bdv').value = total || '';
+                userData.saldos.bdv = total;
+            },
+
+            addBdvSubcuenta() {
+                const nombre = document.getElementById('bdv-sub-nombre').value.trim();
+                const monto = parseFloat(document.getElementById('bdv-sub-monto').value);
+
+                if (!nombre) return UI.toast('⚠️ Ingresa un nombre');
+                if (!monto || monto <= 0) return UI.toast('⚠️ Ingresa un monto válido');
+
+                if (!userData.saldos.bdvSubcuentas) userData.saldos.bdvSubcuentas = [];
+                userData.saldos.bdvSubcuentas.push({ nombre, monto });
+
+                document.getElementById('bdv-sub-nombre').value = '';
+                document.getElementById('bdv-sub-monto').value = '';
+
+                this.renderBdvSubcuentas();
+                this.renderTotalsOnly();
+                UI.toast('✅ Sub-cuenta agregada');
+            },
+
+            deleteBdvSubcuenta(index) {
+                if (!confirm('¿Eliminar esta sub-cuenta?')) return;
+                userData.saldos.bdvSubcuentas.splice(index, 1);
+                this.renderBdvSubcuentas();
+                this.renderTotalsOnly();
+                UI.toast('🗑️ Sub-cuenta eliminada');
+            },
+            // 5. RENDERIZADO REUTILIZABLE (GENERADOR HTML ÚNICO)
+            crearHTMLTarjeta(m, k) {
+                let icon = '⚪', color = '#fff', sign = '', detalleHTML = '';
+                // Mapeo de método para display
+                let metodoStr = (m.metodo || m.moneda) ? `(${m.metodo || m.moneda})` : '';
+
+                if (m.tipo === 'p') {
+                    icon = '🔴';
+                    color = 'var(--danger)';
+                    sign = `Préstamo a ${m.nombre || m.desc}`;
+                    detalleHTML = m.detalle || 'Préstamo';
+                } else if (m.tipo === 'a') {
+                    icon = '🟢';
+                    color = 'var(--accent)';
+                    sign = `Abono ${metodoStr} de ${m.nombre || m.desc}`;
+
+                    // LÓGICA DE CÁLCULO EN TIEMPO REAL
+                    const metodo = m.metodo || m.moneda;
+                    if (metodo === 'BS') {
+                        const tasaCalc = m.tasa || m.tasaUsada || 1;
+                        const bsCalc = (m.monto || 0) * tasaCalc;
+                        // Formato EXACTO solicitado: Pago: Bs. [Result] (Equivalente a $[USD])
+                        detalleHTML = `Pago: Bs. ${AppLogic.formatMoney(bsCalc)} (Equivalente a $${AppLogic.formatMoney(m.monto)})`;
+                    } else {
+                        detalleHTML = m.detalle || (metodo === 'EFECTIVO' ? 'Pago: Efectivo (Físico)' : (metodo === 'BINANCE' ? 'Pago: Binance (USDT)' : 'Abono'));
+                    }
+                }
+
+                // ESTRUCTURA DE TARJETA GLOBAL
+                return `<div class="transaction-card" style="background:var(--bg-secondary);padding:12px;margin-bottom:12px;border-radius:8px;font-size:0.9rem;border-left:4px solid ${color};box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <span style="font-weight:700;font-size:0.95rem">${icon} ${sign}</span>
+                        <strong style="color:${color};font-size:1.2rem;font-weight:800">$${AppLogic.formatMoney(m.monto)}</strong>
+                    </div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.5;border-top:1px solid var(--border);padding-top:6px;margin-top:4px">
+                        <div style="margin-bottom:2px;font-weight:500;opacity:0.8">📅 ${m.f || m.fecha || k || ''}</div>
+                        <div>${detalleHTML}</div>
+                    </div>
+                </div>`;
             }
         };
 
@@ -1470,7 +1696,7 @@
                     g.innerHTML += `<div class="calendar-day ${historialData[k] ? 'has-data' : ''}" onclick="Calendar.showDay('${k}')">${d}</div>`;
                 }
             },
-            // 4. GESTIÓN DEL HISTORIAL - Mostrar detalles completos del día
+            // 4. GESTIÓN DEL HISTORIAL - CALENDARIO UNIFICADO
             showDay(k) {
                 const d = historialData[k];
                 if (!d) return UI.toast('Sin datos para esta fecha');
@@ -1492,48 +1718,42 @@
                     h += `<div class="detail-row"><span class="detail-label">💱 Tasa del Día</span><span class="detail-value">Bs. ${AppLogic.formatMoney(d.tasa)}</span></div>`;
                 }
 
-                // Sección: Desglose de Cuentas
+                // Sección: Desglose de Cuentas (Sin cambios)
                 h += `<h4 style="margin:16px 0 8px;color:var(--accent)">💰 Cuentas</h4>`;
                 h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">`;
-
                 if (d.binance !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Binance</div><div style="font-weight:600;color:#F0B90B">$${AppLogic.formatMoney(d.binance)}</div></div>`;
                 if (d.bnc !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">BNC</div><div style="font-weight:600">$${AppLogic.formatMoney(d.bnc)}</div></div>`;
                 if (d.bancaribe !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Bancaribe</div><div style="font-weight:600">$${AppLogic.formatMoney(d.bancaribe)}</div></div>`;
                 if (d.fisico !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Efectivo</div><div style="font-weight:600;color:var(--accent)">$${AppLogic.formatMoney(d.fisico)}</div></div>`;
                 if (d.bolivares !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Bolívares</div><div style="font-weight:600">Bs. ${AppLogic.formatMoney(d.bolivares)}</div></div>`;
+                if (d.zelle !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">Zelle</div><div style="font-weight:600;color:#6D28D9">$${AppLogic.formatMoney(d.zelle)}</div></div>`;
+                if (d.paypal !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">PayPal</div><div style="font-weight:600;color:#003087">$${AppLogic.formatMoney(d.paypal)}</div></div>`;
+                if (d.bdv !== undefined) h += `<div style="background:var(--bg-secondary);padding:10px;border-radius:8px"><div style="font-size:0.7rem;color:var(--text-secondary)">BDV</div><div style="font-weight:600;color:#0066CC">$${AppLogic.formatMoney(d.bdv)}</div></div>`;
 
+                if (d.bdvSubcuentas && d.bdvSubcuentas.length > 0) {
+                    h += `<div style="grid-column:1/-1;background:var(--bg-secondary);padding:10px;border-radius:8px;margin-top:8px"><div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:6px">Sub-cuentas BDV:</div>`;
+                    d.bdvSubcuentas.forEach(sub => { h += `<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:4px 0"><span>${sub.nombre}</span><span style="color:var(--accent)">$${AppLogic.formatMoney(sub.monto)}</span></div>`; });
+                    h += `</div>`;
+                }
                 h += `</div>`;
 
                 // Sección: Deudores
                 if (d.deudores && d.deudores.length > 0) {
                     h += `<h4 style="margin:16px 0 8px;color:var(--danger)">📋 Deudores (${d.deudores.length})</h4>`;
                     h += `<div style="background:var(--bg-secondary);border-radius:10px;padding:10px">`;
-                    d.deudores.forEach(x => {
-                        h += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-                            <span>${x.nombre}</span>
-                            <span style="color:var(--danger);font-weight:600">$${AppLogic.formatMoney(x.monto)}</span>
-                        </div>`;
-                    });
+                    d.deudores.forEach(x => { h += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>${x.nombre}</span><span style="color:var(--danger);font-weight:600">$${AppLogic.formatMoney(x.monto)}</span></div>`; });
                     h += `</div>`;
                     h += `<div class="detail-row" style="margin-top:8px"><span class="detail-label">Total en Deudas</span><span class="detail-value" style="color:var(--danger)">$${AppLogic.formatMoney(d.deudaTotal || 0)}</span></div>`;
                 }
 
-                // Sección: Movimientos del día
+                // Sección: Movimientos del Día - LÓGICA UNIFICADA
                 if (d.movimientos && d.movimientos.length > 0) {
-                    const movimientosHoy = d.movimientos.filter(m => m.f === k);
+                    // Filtrar movimientos del día y ordenar por recientes
+                    const movimientosHoy = d.movimientos.filter(m => m.f === k || m.fecha === k).reverse();
                     if (movimientosHoy.length > 0) {
                         h += `<h4 style="margin:16px 0 8px;color:var(--blue)">📝 Movimientos del Día</h4>`;
                         movimientosHoy.forEach(m => {
-                            let icon = '⚪', color = '#fff';
-                            if (m.tipo === 'p') { icon = '🔴'; color = 'var(--danger)'; }
-                            if (m.tipo === 'a') { icon = '🟢'; color = 'var(--accent)'; }
-                            h += `<div style="background:var(--bg-secondary);padding:8px;margin-bottom:4px;border-radius:6px;font-size:0.85rem">
-                                <div style="display:flex;justify-content:space-between">
-                                    <span>${icon} ${m.desc}</span>
-                                    <strong style="color:${color}">$${AppLogic.formatMoney(m.monto)}</strong>
-                                </div>
-                                ${m.detalle ? `<div style="font-size:0.75rem;color:#888">${m.detalle}</div>` : ''}
-                            </div>`;
+                            h += AppData.crearHTMLTarjeta(m, k);
                         });
                     }
                 }
